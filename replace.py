@@ -1,5 +1,7 @@
 import os
 import sys
+import re
+
 
 def replace_in_file(input_file, output_file, replacements):
     with open(input_file, 'r', encoding='utf-8') as infile:
@@ -7,9 +9,30 @@ def replace_in_file(input_file, output_file, replacements):
         
     for search, replace in replacements:
         content = content.replace(search, replace)
+
+    check_content(content)
     
     with open(output_file, 'w', encoding='utf-8') as outfile:
         outfile.write(content)
+
+def check_content(content):
+    warning_words = [
+        '可能戦闘中'
+        '軽減奥義',
+        '計算自分から',
+        '、<br>',
+    ]
+    for word in warning_words:
+        if word in content:
+            print(f"[WARN] {word}が含まれます 本文: {content}")
+
+    patterns = [
+        # 行頭、<br>以外に続く暗器効果(文の途中に出てくる)
+        r"(?<!^)(?<!<br>)【暗器\([0-9]\)】",
+    ]
+    for pattern in patterns:
+        if re.search(pattern, content):
+            print(f"[WARN] {pattern}が含まれます 本文: {content}")
 
 def main(input_directory, output_directory):
     if not os.path.isdir(input_directory):
