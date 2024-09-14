@@ -81,8 +81,8 @@ def getBirthdayFeCharInfosBySqlite3All():
         name = row[0]
         series = row[1]
         english_name = row[2]
-        thumb = [3]
-        birthday = [4]
+        thumb = row[3]
+        birthday = row[4]
         infos.append(charinfo.FeCharInfo(name, series, english_name, thumb, birthday, ""))
 
     connection.close()
