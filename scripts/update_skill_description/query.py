@@ -29,11 +29,6 @@ def insert_data(conn, data: List[Tuple[str, str]]) -> None:
         SET {fields[1]} = excluded.{fields[1]},
             {fields[2]} = excluded.{fields[2]}
         ''', (skill_id, skill_name, description))
-
-        # cursor.execute(f'''
-        # INSERT OR UPDATE INTO skills ({fields})
-        # VALUES (?, ?, ?)
-        # ''', (skill_id, skill_name, description))
     conn.commit()
 
 
