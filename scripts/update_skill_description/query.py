@@ -49,7 +49,7 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
-    data_to_insert = parse_file('./../../sources/skill-desc/8-9-17.txt')
+    data_to_insert = parse_file('./../../sources/skill-desc/8-9-27.txt')
     # データを挿入する
     insert_data(conn, data_to_insert)
 
