@@ -22,6 +22,7 @@ def insert_data(conn, data: List[Tuple[str, str]]) -> None:
         elif refinement_type == 's':
             fields = ['id', 'name', 'special_refine_description']
         print(fields)
+        # noinspection SqlInsertValues
         cursor.execute(f'''
         INSERT INTO skills ({','.join(fields)})
         VALUES (?, ?, ?)
@@ -49,7 +50,7 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
-    data_to_insert = parse_file('./../../sources/skill-desc/8-9-27.txt')
+    data_to_insert = parse_file('./../../sources/skill-desc/8-10-4.txt')
     # データを挿入する
     insert_data(conn, data_to_insert)
 
