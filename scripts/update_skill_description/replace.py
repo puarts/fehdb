@@ -4,6 +4,7 @@ import re
 
 REPLACEMENTS = [
     (' ', ''),
+    ('自車', '自軍'),
     ('增幅', '増幅'),
     ('擊', '撃'),
     ('収撃', '攻撃'),
@@ -79,6 +80,7 @@ def check_content(content):
         '軽減奥義',
         '計算自分から',
         '、<br>',
+        'かっ',
     ]
     for word in warning_words:
         if word in content:
@@ -92,6 +94,8 @@ def check_content(content):
         r'距離に関係なく反撃する[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+',
         r'[0-9]戦闘開始時',
         r'[0-9]周囲',
+        r'\([\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]{1,10}】',
+        r'【[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]{1,10}\)',
     ]
     for pattern in patterns:
         if re.search(pattern, content):
