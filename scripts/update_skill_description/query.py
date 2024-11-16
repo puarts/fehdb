@@ -79,6 +79,7 @@ def main():
         if not is_incrementing_by_one(index_list):
             print(f"[WARN] インデックスが順番になっていません: {index_list}")
         check_type(data_to_insert)
+        check_might(data_to_insert)
         print('[変換結果]')
         print('\n'.join(map(str, data_to_insert)))
 
@@ -104,6 +105,13 @@ def check_type(lines: List[Tuple[str, str, dict]]):
         name, _, d = line
         if not 'type' in d:
             print(f"[WARN] スキルタイプがありません. name: {name}, d: {d}")
+
+
+def check_might(lines: List[Tuple[str, str, dict]]):
+    for line in lines:
+        name, _, d = line
+        if 'weapon_type' in d and not 'might' in d:
+            print(f"[WARN] 威力がありません. name: {name}, d: {d}")
 
 
 if __name__ == '__main__':
