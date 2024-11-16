@@ -55,6 +55,11 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
             result['cooldown_count'] = -1
         elif description == '自分から攻撃した時、2回攻撃':
             result['atk_count'] = 2
+        elif description == '2回攻撃(敵から攻撃された時も、2回攻撃可能)':
+            result['atk_count'] = 2
+            result['counteratk_count'] = 2
+        elif description == '飛行特効':
+            result['effective'] = '|飛行|'
     return result
 
 
