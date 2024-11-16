@@ -50,8 +50,11 @@ def get_field_dict(descriptions: List[str], fields_comments: List[str]) -> dict:
 def get_field_dict_from_description(descriptions: List[str]) -> dict:
     result = {}
     for description in descriptions:
-        if description.strip() == '奥義が発動しやすい(発動カウント-1)':
+        description = description.strip()
+        if description == '奥義が発動しやすい(発動カウント-1)':
             result['cooldown_count'] = -1
+        elif description == '自分から攻撃した時、2回攻撃':
+            result['atk_count'] = 2
     return result
 
 
