@@ -4,15 +4,15 @@ from typing import List, Tuple
 from parse_file import parse_file
 
 
-def insert_data(conn, data: List[Tuple[str, str]]) -> None:
+def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
     """
     データをテーブルに挿入する関数
 
     :param conn:
-    :param data: (info, description) のペアを含むタプルのリスト
+    :param data: (info, description, dict) のタプルのリスト
     """
     cursor = conn.cursor()
-    for info, description in data:
+    for info, description, other_field_dict in data:
         skill_id, refinement_type, skill_name = info.split('-')
         print(skill_id, refinement_type, skill_name, description)
         fields = ''
@@ -31,6 +31,12 @@ def insert_data(conn, data: List[Tuple[str, str]]) -> None:
         SET {fields[1]} = excluded.{fields[1]},
             {fields[2]} = excluded.{fields[2]}
         ''', (skill_id, skill_name, description))
+
+        if other_field_dict:
+            # フィールドを安全に動的に更新するためのクエリ作成
+            set_clause = ", ".join([f"{field} = :{field}" for field in other_field_dict.keys()])
+            query = f"UPDATE skills SET {set_clause} WHERE id = :id"
+            cursor.execute(query, {**other_field_dict, 'id': skill_id})
     conn.commit()
 
 
@@ -63,7 +69,7 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
-    data_to_insert = parse_file('./../../sources/skill-desc/8-11-06-2.txt')
+    data_to_insert = parse_file('./../../sources/skill-desc/8-11-15.txt')
     # data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-11.txt')
     # データを挿入する
     if not dry_run:
@@ -72,6 +78,7 @@ def main():
         index_list = list(map(lambda x: int(x[0].split('-')[0]), data_to_insert))
         if not is_incrementing_by_one(index_list):
             print(f"[WARN] インデックスが順番になっていません: {index_list}")
+        check_type(data_to_insert)
         print('[変換結果]')
         print('\n'.join(map(str, data_to_insert)))
 
@@ -90,6 +97,13 @@ def is_incrementing_by_one(lst):
             return False
 
     return True
+
+
+def check_type(lines: List[Tuple[str, str, dict]]):
+    for line in lines:
+        name, _, d = line
+        if not 'type' in d:
+            print(f"[WARN] スキルタイプがありません. name: {name}, d: {d}")
 
 
 if __name__ == '__main__':

@@ -102,19 +102,19 @@ def check_content(content):
             print(f"[WARN] {pattern}が含まれます 本文: {content}")
 
 
-def main(input_directory, output_directory):
-    if not os.path.isdir(input_directory):
-        print(f"Error: Input directory '{input_directory}' does not exist.")
+def main(input_dir, output_dir):
+    if not os.path.isdir(input_dir):
+        print(f"Error: Input directory '{input_dir}' does not exist.")
         sys.exit(1)
 
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     replacements = REPLACEMENTS
-    for filename in os.listdir(input_directory):
+    for filename in os.listdir(input_dir):
         if filename.endswith('.txt'):
-            input_file = os.path.join(input_directory, filename)
-            output_file = os.path.join(output_directory, filename)
+            input_file = os.path.join(input_dir, filename)
+            output_file = os.path.join(output_dir, filename)
             replace_in_file(input_file, output_file, replacements)
 
     print("Replacement completed.")
