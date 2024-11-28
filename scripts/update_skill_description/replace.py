@@ -2,6 +2,8 @@ import os
 import sys
 import re
 
+from util import warn
+
 REPLACEMENTS = [
     (' ', ''),
     ('自車', '自軍'),
@@ -84,7 +86,7 @@ def check_content(content):
     ]
     for word in warning_words:
         if word in content:
-            print(f"[WARN] {word}が含まれます 本文: {content}")
+            print(warn(f"{word}が含まれます 本文: {content}"))
 
     patterns = [
         # 行頭、<br>以外に続く暗器効果(文の途中に出てくる)
@@ -98,8 +100,9 @@ def check_content(content):
         r'【[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]{1,10}\)',
     ]
     for pattern in patterns:
-        if re.search(pattern, content):
-            print(f"[WARN] {pattern}が含まれます 本文: {content}")
+        match = re.search(pattern, content)
+        if match:
+            print(warn(f"{pattern}が含まれます match: {match}, 本文: {content}"))
 
 
 def main(input_dir, output_dir):

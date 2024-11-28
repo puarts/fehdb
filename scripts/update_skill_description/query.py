@@ -2,6 +2,7 @@ import argparse
 import sqlite3
 from typing import List, Tuple
 from parse_file import parse_file
+from util import warn
 
 
 def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
@@ -77,7 +78,7 @@ def main():
     else:
         index_list = list(map(lambda x: int(x[0].split('-')[0]), data_to_insert))
         if not is_incrementing_by_one(index_list):
-            print(f"[WARN] インデックスが順番になっていません: {index_list}")
+            print(warn(f"インデックスが順番になっていません: {index_list}"))
         check_type(data_to_insert)
         check_weapon(data_to_insert)
         check_might(data_to_insert)
@@ -105,21 +106,21 @@ def check_type(lines: List[Tuple[str, str, dict]]):
     for line in lines:
         name, _, d = line
         if not 'type' in d:
-            print(f"[WARN] スキルタイプがありません. name: {name}, d: {d}")
+            print(warn(f"スキルタイプがありません. name: {name}, d: {d}"))
 
 
 def check_weapon(lines: List[Tuple[str, str, dict]]):
     for line in lines:
         name, _, d = line
         if 'type' in d and d['type'] == '武器' and not 'weapon_type' in d:
-            print(f"[WARN] 武器タイプがありません. name: {name}, d: {d}")
+            print(warn(f"武器タイプがありません. name: {name}, d: {d}"))
 
 
 def check_might(lines: List[Tuple[str, str, dict]]):
     for line in lines:
         name, _, d = line
         if 'weapon_type' in d and not 'might' in d:
-            print(f"[WARN] 威力がありません. name: {name}, d: {d}")
+            print(warn(f"威力がありません. name: {name}, d: {d}"))
 
 
 if __name__ == '__main__':
