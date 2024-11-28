@@ -70,7 +70,7 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
-    data_to_insert = parse_file('./../../sources/skill-desc/8-11-16.txt')
+    data_to_insert = parse_file('./../../sources/skill-desc/8-11-29.txt')
     # data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-11.txt')
     # データを挿入する
     if not dry_run:
