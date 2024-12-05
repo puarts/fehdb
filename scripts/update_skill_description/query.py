@@ -17,12 +17,23 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
         skill_id, refinement_type, skill_name = info.split('-')
         print(skill_id, refinement_type, skill_name, description)
         fields = ''
+        is_refinement = False
+        is_special_refinement = False
+        special_refine_hp = 0
         if refinement_type == 'n':
             fields = ['id', 'name', 'description']
         elif refinement_type == 'r':
             fields = ['id', 'name', 'refine_description']
+            is_refinement = True
         elif refinement_type == 's':
             fields = ['id', 'name', 'special_refine_description']
+            is_refinement = True
+            is_special_refinement = True
+        elif refinement_type == 's3':
+            fields = ['id', 'name', 'special_refine_description']
+            is_refinement = True
+            is_special_refinement = True
+            special_refine_hp = 3
         print(fields)
         # noinspection SqlInsertValues
         cursor.execute(f'''
@@ -33,11 +44,17 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
             {fields[2]} = excluded.{fields[2]}
         ''', (skill_id, skill_name, description))
 
-        if other_field_dict:
+        if other_field_dict and not is_refinement:
             # フィールドを安全に動的に更新するためのクエリ作成
             set_clause = ", ".join([f"{field} = :{field}" for field in other_field_dict.keys()])
             query = f"UPDATE skills SET {set_clause} WHERE id = :id"
             cursor.execute(query, {**other_field_dict, 'id': skill_id})
+        if is_refinement:
+            query = f'UPDATE skills SET can_status_refine = "true" WHERE id = :id'
+            cursor.execute(query, {'id': skill_id})
+        if is_special_refinement:
+            query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE id = :id"
+            cursor.execute(query, {'id': skill_id})
     conn.commit()
 
 
@@ -70,8 +87,8 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
-    data_to_insert = parse_file('./../../sources/skill-desc/8-11-29.txt')
-    # data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-11.txt')
+    # data_to_insert = parse_file('./../../sources/skill-desc/9-12-6.txt')
+    data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-12.txt')
     # データを挿入する
     if not dry_run:
         insert_data(conn, data_to_insert)
