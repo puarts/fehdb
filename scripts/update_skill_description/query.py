@@ -87,15 +87,16 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
+    should_check_id = True
     # data_to_insert = parse_file('./../../sources/skill-desc/9-12-6.txt')
     data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-12.txt')
+    should_check_id = False
+
     # データを挿入する
     if not dry_run:
         insert_data(conn, data_to_insert)
     else:
-        index_list = list(map(lambda x: int(x[0].split('-')[0]), data_to_insert))
-        if not is_incrementing_by_one(index_list):
-            print(warn(f"インデックスが順番になっていません: {index_list}"))
+        check_id(conn, data_to_insert, should_check_id)
         check_type(data_to_insert)
         check_weapon(data_to_insert)
         check_might(data_to_insert)
@@ -104,6 +105,28 @@ def main():
 
     # データベース接続を閉じる
     conn.close()
+
+
+def check_id(conn, data_to_insert, should_check_id):
+    id_list = list(map(lambda x: int(x[0].split('-')[0]), data_to_insert))
+    if len(id_list) >= 1 and should_check_id:
+        # 最大値を取得するクエリ
+        query = f"SELECT MAX(id) FROM skills"
+
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query)
+            max_id = cursor.fetchone()[0]  # 最大値を取得
+            if max_id is None:
+                print(warn('テーブルが空です。'))
+            print(f"最大のid: {max_id}")
+            if not (max_id < id_list[0]):
+                print(warn(f"idが現在の最大値より大きくありません: not {max_id} < {id_list}"))
+        finally:
+            cursor.close()
+            conn.close()
+        if not is_incrementing_by_one(id_list):
+            print(warn(f"idが順番になっていません: {id_list}"))
 
 
 def is_incrementing_by_one(lst):
