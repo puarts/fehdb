@@ -53,6 +53,8 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
         description = description.strip()
         if description == '奥義が発動しやすい(発動カウント-1)':
             result['cooldown_count'] = -1
+        elif description == '敵から攻撃された時、距離に関係なく反撃する':
+            result['all_dist_counter'] = True
         elif description == '自分から攻撃した時、2回攻撃':
             result['atk_count'] = 2
         elif description == '2回攻撃(敵から攻撃された時も、2回攻撃可能)':
@@ -70,17 +72,17 @@ def get_field_dict_from_comments(comments: List[str]) -> dict:
         for field in comment.split(','):
             field = field.strip()
             # w-rs: 剣
-            # [asdr]-3: 攻撃、速さ、守備、魔防-3
+            # [hasdr]-3: HP、攻撃、速さ、守備、魔防-3
             if '-' in field:
                 prefix, suffix = field.split('-')
                 if prefix == 'w':
                     _set_weapon(suffix, result)
                 else:
-                    # [asdr]-3: 攻撃、速さ、守備、魔防-3
+                    # [hasdr]-3: HP、攻撃、速さ、守備、魔防-3
                     _set_stats(prefix, -int(suffix), result)
             if '+' in field:
                 prefix, suffix = field.split('+')
-                # [asdr]+3: 攻撃、速さ、守備、魔防+3
+                # [hasdr]+3: HP、攻撃、速さ、守備、魔防+3
                 _set_stats(prefix, int(suffix), result)
             else:
                 # ex) s: 奥義
@@ -102,6 +104,8 @@ def _set_weapon(suffix: str, result: dict):
         result['weapon_type'] = '斧'
     elif suffix == 'bo':
         result['weapon_type'] = '弓'
+    elif suffix == 'da':
+        result['weapon_type'] = '暗器'
     elif suffix == 'cs':
         result['weapon_type'] = '杖'
     elif suffix == 'br':
@@ -130,13 +134,15 @@ def _get_weapon_type(weapon_type: str) -> str:
 
 def _set_stats(stats: str, value: int, result: dict):
     for stat in stats:
-        if stat == 'a':
+        if stat == 'h':
+            result['hp'] = value
+        elif stat == 'a':
             result['atk'] = value
-        if stat == 's':
+        elif stat == 's':
             result['spd'] = value
-        if stat == 'd':
+        elif stat == 'd':
             result['def'] = value
-        if stat == 'r':
+        elif stat == 'r':
             result['res'] = value
 
 
