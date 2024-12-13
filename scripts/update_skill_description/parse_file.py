@@ -54,7 +54,7 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
         if description == '奥義が発動しやすい(発動カウント-1)':
             result['cooldown_count'] = -1
         elif description == '敵から攻撃された時、距離に関係なく反撃する':
-            result['all_dist_counter'] = True
+            result['all_dist_counter'] = "true"
         elif description == '自分から攻撃した時、2回攻撃':
             result['atk_count'] = 2
         elif description == '2回攻撃(敵から攻撃された時も、2回攻撃可能)':
@@ -62,6 +62,8 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
             result['counteratk_count'] = 2
         elif description == '飛行特効':
             result['effective'] = '|飛行|'
+        elif description == '敵は反撃不可':
+            result['disable_counter'] = "true"
     return result
 
 
