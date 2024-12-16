@@ -53,6 +53,8 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
         description = description.strip()
         if description == '奥義が発動しやすい(発動カウント-1)':
             result['cooldown_count'] = -1
+        if description == '奥義が発動しやすい(発動カウント-1)(奥義発動カウント最大値の下限は1)':
+            result['cooldown_count'] = -1
         elif description == '敵から攻撃された時、距離に関係なく反撃する':
             result['all_dist_counter'] = "true"
         elif description == '自分から攻撃した時、2回攻撃':
