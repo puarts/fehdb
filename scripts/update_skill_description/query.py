@@ -88,7 +88,7 @@ def main():
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
     should_check_id = True
-    data_to_insert = parse_file('./../../sources/skill-desc/9-12-13.txt')
+    data_to_insert = parse_file('./../../sources/skill-desc/9-12-25.txt')
     # data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-12.txt')
     # should_check_id = False
 
