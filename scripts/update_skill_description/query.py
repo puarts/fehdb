@@ -100,6 +100,7 @@ def main():
         check_type(data_to_insert)
         check_weapon(data_to_insert)
         check_might(data_to_insert)
+        check_special(data_to_insert)
         print('[変換結果]')
         print('\n'.join(map(str, data_to_insert)))
 
@@ -161,6 +162,13 @@ def check_might(lines: List[Tuple[str, str, dict]]):
         name, _, d = line
         if 'weapon_type' in d and not 'might' in d:
             print(warn(f"威力がありません. name: {name}, d: {d}"))
+
+
+def check_special(lines: List[Tuple[str, str, dict]]):
+    for line in lines:
+        name, _, d = line
+        if 'type' in d and d['type'] == '奥義' and not 'count' in d:
+            print(warn(f"カウントがありません. name: {name}, d: {d}"))
 
 
 if __name__ == '__main__':
