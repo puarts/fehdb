@@ -54,6 +54,7 @@ REPLACEMENTS = [
     ('。', '、'),
     ('◎', '○'),
     ('●', '○'),
+    ('：', ':'),
     ('\n', '<br>'),  # Unix/Linux/macOS の LF をスペースに置換
     ('\r\n', '<br>'),  # Windows の CRLF をスペースに置換
 ]
