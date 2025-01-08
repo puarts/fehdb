@@ -148,7 +148,7 @@ def main():
         print('\n'.join(map(str, data_to_insert)))
 
         print('')
-        print('[シミュレータ用出力]')
+        print('[シミュレーター用出力]')
         print_simulator_code(data_to_insert)
 
     # データベース接続を閉じる
@@ -172,7 +172,7 @@ def print_simulator_code(data_to_insert):
             skill_type = options['type']
         else:
             skill_type = 'null'
-        print(f"{type_symbol(skill_type)}.{skill_e_name}: {skill_id}, // {skill_name}")
+        print(f"{type_symbol(skill_type)}.{skill_e_name} = {skill_id}; // {skill_name}")
 
 
 def to_pascal_case(sentence):
