@@ -20,7 +20,7 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
     cursor = conn.cursor()
     for info, description, other_field_dict in data:
         split = info.split('-')
-        skill_id, refinement_type, skill_name = split
+        skill_id, refinement_type, skill_name, *rest = split
         skill_e_name = None
         if len(split) == 4:
             skill_e_name = split[3]
