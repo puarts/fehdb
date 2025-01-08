@@ -1,6 +1,11 @@
 import argparse
+import re
 import sqlite3
+import sys
 from typing import List, Tuple
+
+from unidecode import unidecode
+
 from parse_file import parse_file
 from util import warn
 
@@ -14,8 +19,12 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
     """
     cursor = conn.cursor()
     for info, description, other_field_dict in data:
-        skill_id, refinement_type, skill_name = info.split('-')
-        print(skill_id, refinement_type, skill_name, description)
+        split = info.split('-')
+        skill_id, refinement_type, skill_name, *rest = split
+        skill_e_name = None
+        if len(split) == 4:
+            skill_e_name = split[3]
+        print(skill_id, skill_e_name, refinement_type, skill_name, description)
         fields = ''
         is_refinement = False
         is_special_refinement = False
@@ -35,26 +44,53 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
             is_special_refinement = True
             special_refine_hp = 3
         print(fields)
-        # noinspection SqlInsertValues
-        cursor.execute(f'''
-        INSERT INTO skills ({','.join(fields)})
-        VALUES (?, ?, ?)
-        ON CONFLICT({fields[0]}) DO UPDATE
-        SET {fields[1]} = excluded.{fields[1]},
-            {fields[2]} = excluded.{fields[2]}
-        ''', (skill_id, skill_name, description))
+        id_field, name_field, description_field = fields
 
+        # 新規スキル
+        if not is_refinement or int(skill_id) != 0:
+            # noinspection SqlInsertValues
+            cursor.execute(f'''
+            INSERT INTO skills ({','.join(fields)})
+            VALUES (?, ?, ?)
+            ON CONFLICT({id_field}) DO UPDATE
+            SET {name_field} = excluded.{name_field},
+                {description_field} = excluded.{description_field}
+            ''', (skill_id, skill_name, description))
+        else:
+            # 武器錬成
+            # 月光のように同じ名前がある場合は0以外のidを指定すること
+            query = f"UPDATE skills SET {description_field} = :description WHERE name = :skill_name"
+            cursor.execute(query, {'description': description, 'skill_name': skill_name})
+
+        # 英語名がある場合は入力
+        if skill_e_name is not None:
+            query = "UPDATE skills SET english_name = :english_name WHERE id = :id"
+            cursor.execute(query, {'english_name': skill_e_name, 'id': skill_id})
+
+        # オプションの設定
         if other_field_dict and not is_refinement:
             # フィールドを安全に動的に更新するためのクエリ作成
             set_clause = ", ".join([f"{field} = :{field}" for field in other_field_dict.keys()])
             query = f"UPDATE skills SET {set_clause} WHERE id = :id"
             cursor.execute(query, {**other_field_dict, 'id': skill_id})
+
+        # 武器錬成可能設定
         if is_refinement:
-            query = f'UPDATE skills SET can_status_refine = "true" WHERE id = :id'
-            cursor.execute(query, {'id': skill_id})
+            if skill_id != 0:
+                query = f'UPDATE skills SET can_status_refine = "true" WHERE id = :id'
+                cursor.execute(query, {'id': skill_id})
+            else:
+                query = f'UPDATE skills SET can_status_refine = "true" WHERE name = :skill_name'
+                cursor.execute(query, {'name': skill_name})
+
+        # 特殊錬成のHP設定
         if is_special_refinement:
-            query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE id = :id"
-            cursor.execute(query, {'id': skill_id})
+            if skill_id != 0:
+                query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE id = :id"
+                cursor.execute(query, {'id': skill_id})
+            else:
+                query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE name = :skill_name"
+                cursor.execute(query, {'name': skill_name})
     conn.commit()
 
 
@@ -73,13 +109,22 @@ def parse_field(parsed: List[Tuple[str, str]]) -> List[Tuple[str, str, str, str,
 
 def main():
     # 引数パーサを作成
-    parser = argparse.ArgumentParser(description="Dry run flag example")
+    parser = argparse.ArgumentParser(description='This script inserts skill descriptions into the database.')
 
     # `--dry-run` 引数をオプションとして追加（指定しないと `False` になる）
-    parser.add_argument('--dry-run', action='store_true', help="Perform a dry run without making changes")
+    parser.add_argument('--dry-run', action='store_true', help='Perform a dry run without making changes')
+
+    parser.add_argument('--check-id', action='store_true', help='Check skill id')
+
+    # ファイル名を引数として追加
+    parser.add_argument('input_file', type=str, help='Filename')
 
     # 引数を解析
     args = parser.parse_args()
+
+    if not args.input_file:
+        print("Error: input_file is required.", file=sys.stderr)
+        sys.exit(1)
 
     # dry-run フラグが設定されていれば True、されていなければ False
     dry_run = args.dry_run
@@ -87,10 +132,8 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
-    should_check_id = True
-    data_to_insert = parse_file('./../../sources/skill-desc/9-1-1.txt')
-    # data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-12.txt')
-    # should_check_id = False
+    should_check_id = args.check_id
+    data_to_insert = parse_file(args.input_file)
 
     # データを挿入する
     if not dry_run:
@@ -104,25 +147,75 @@ def main():
         print('[変換結果]')
         print('\n'.join(map(str, data_to_insert)))
 
+        print('')
+        print('[シミュレーター用出力]')
+        print_simulator_code(data_to_insert)
+
     # データベース接続を閉じる
     conn.close()
+
+
+def print_simulator_code(data_to_insert):
+    for data in data_to_insert:
+        # print(f"data: {data}")
+        # print(f"data0: {data[0].split('-')}")
+        header = data[0].split('-')
+        skill_id = header[0]
+        skill_name = header[2]
+        if len(header) >= 4:
+            skill_e_name = header[3]
+        else:
+            skill_e_name = skill_name
+        skill_e_name = to_pascal_case(skill_e_name)
+        options = data[2]
+        if 'type' in options:
+            skill_type = options['type']
+        else:
+            skill_type = 'null'
+        print(f"{type_symbol(skill_type)}.{skill_e_name} = {skill_id}; // {skill_name}")
+
+
+def to_pascal_case(sentence):
+    # アルファベットのみに変換
+    sentence = unidecode(sentence)
+
+    sentence = sentence.replace("/", " ").replace("+", " Plus")
+
+    # 単語を変数名に適した形に変換した後に単語から不要な記号を削除
+    words = [re.sub(r'[^a-zA-Z0-9\s]', '', replace_skill_word(word)) for word in sentence.split()]
+
+    # 各単語をタイトルケースに変換し連結(その際に変数名に適した変換をする)
+    pascal_case = ''.join(replace_skill_word(word).capitalize() for word in words)
+
+    return pascal_case
+
+
+def replace_skill_word(name):
+    return name.replace("II", "2")
 
 
 def check_id(conn, data_to_insert, should_check_id):
     id_list = list(map(lambda x: int(x[0].split('-')[0]), data_to_insert))
     if len(id_list) >= 1 and should_check_id:
         # 最大値を取得するクエリ
-        query = f"SELECT MAX(id) FROM skills"
+        query = """
+        SELECT id, name, english_name, type
+        FROM skills
+        WHERE id = (SELECT MAX(id) FROM skills)
+        """
 
         cursor = conn.cursor()
         try:
             cursor.execute(query)
-            max_id = cursor.fetchone()[0]  # 最大値を取得
-            if max_id is None:
+            row = cursor.fetchone()  # 最大値の行を取得
+
+            if row:
+                max_id, name, english_name, skill_type = row
+                print(f"最大のID: {max_id}, 名前: {name}, 英語名: {english_name}, タイプ: {skill_type}")
+                if not (max_id < id_list[0]):
+                    print(warn(f"idが現在の最大値より大きくありません: not {max_id} < {id_list}"))
+            else:
                 print(warn('テーブルが空です。'))
-            print(f"最大のid: {max_id}")
-            if not (max_id < id_list[0]):
-                print(warn(f"idが現在の最大値より大きくありません: not {max_id} < {id_list}"))
         finally:
             cursor.close()
             conn.close()
@@ -169,6 +262,23 @@ def check_special(lines: List[Tuple[str, str, dict]]):
         name, _, d = line
         if 'type' in d and d['type'] == '奥義' and not 'count' in d:
             print(warn(f"カウントがありません. name: {name}, d: {d}"))
+
+
+def type_symbol(type_str):
+    if type_str == '武器':
+        return 'Weapon'
+    if type_str == 'サポート':
+        return 'Support'
+    if type_str == '奥義':
+        return 'Special'
+    if type_str == 'パッシブA':
+        return 'PassiveA'
+    if type_str == 'パッシブB':
+        return 'PassiveB'
+    if type_str == 'パッシブC':
+        return 'PassiveC'
+    if type_str == '響心':
+        return 'PassiveX'
 
 
 if __name__ == '__main__':
