@@ -47,7 +47,7 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
         id_field, name_field, description_field = fields
 
         # 新規スキル
-        if not is_refinement or skill_id != 0:
+        if not is_refinement or int(skill_id) != 0:
             # noinspection SqlInsertValues
             cursor.execute(f'''
             INSERT INTO skills ({','.join(fields)})
