@@ -77,7 +77,7 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
         # 武器錬成可能設定
         if is_refinement:
             if skill_id != 0:
-                query = f'UPDATE skills SET can_status_refine = "true" WHERE id = :skill_id'
+                query = f'UPDATE skills SET can_status_refine = "true" WHERE id = :id'
                 cursor.execute(query, {'id': skill_id})
             else:
                 query = f'UPDATE skills SET can_status_refine = "true" WHERE name = :skill_name'
@@ -86,7 +86,7 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
         # 特殊錬成のHP設定
         if is_special_refinement:
             if skill_id != 0:
-                query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE id = :skill_id"
+                query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE id = :id"
                 cursor.execute(query, {'id': skill_id})
             else:
                 query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE name = :skill_name"
