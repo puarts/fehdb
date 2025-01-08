@@ -1,6 +1,7 @@
 import argparse
 import re
 import sqlite3
+import sys
 from typing import List, Tuple
 
 from unidecode import unidecode
@@ -108,13 +109,22 @@ def parse_field(parsed: List[Tuple[str, str]]) -> List[Tuple[str, str, str, str,
 
 def main():
     # 引数パーサを作成
-    parser = argparse.ArgumentParser(description="Dry run flag example")
+    parser = argparse.ArgumentParser(description='This script inserts skill descriptions into the database.')
 
     # `--dry-run` 引数をオプションとして追加（指定しないと `False` になる）
-    parser.add_argument('--dry-run', action='store_true', help="Perform a dry run without making changes")
+    parser.add_argument('--dry-run', action='store_true', help='Perform a dry run without making changes')
+
+    parser.add_argument('--check-id', action='store_true', help='Check skill id')
+
+    # ファイル名を引数として追加
+    parser.add_argument('input_file', type=str, help='Filename')
 
     # 引数を解析
     args = parser.parse_args()
+
+    if not args.input_file:
+        print("Error: input_file is required.", file=sys.stderr)
+        sys.exit(1)
 
     # dry-run フラグが設定されていれば True、されていなければ False
     dry_run = args.dry_run
@@ -122,10 +132,8 @@ def main():
     # データベースに接続する（存在しない場合は作成される）
     conn = sqlite3.connect('./../../feh-skills.sqlite3')
 
-    should_check_id = True
-    data_to_insert = parse_file('./../../sources/skill-desc/9-1-1.txt')
-    # data_to_insert = parse_file('./../../sources/skill-desc/refine-2024-12.txt')
-    # should_check_id = False
+    should_check_id = args.check_id
+    data_to_insert = parse_file(args.input_file)
 
     # データを挿入する
     if not dry_run:
