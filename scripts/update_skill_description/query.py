@@ -43,31 +43,53 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
             is_special_refinement = True
             special_refine_hp = 3
         print(fields)
-        # noinspection SqlInsertValues
-        cursor.execute(f'''
-        INSERT INTO skills ({','.join(fields)})
-        VALUES (?, ?, ?)
-        ON CONFLICT({fields[0]}) DO UPDATE
-        SET {fields[1]} = excluded.{fields[1]},
-            {fields[2]} = excluded.{fields[2]}
-        ''', (skill_id, skill_name, description))
+        id_field, name_field, description_field = fields
+
+        # 新規スキル
+        if not is_refinement or skill_id != 0:
+            # noinspection SqlInsertValues
+            cursor.execute(f'''
+            INSERT INTO skills ({','.join(fields)})
+            VALUES (?, ?, ?)
+            ON CONFLICT({id_field}) DO UPDATE
+            SET {name_field} = excluded.{name_field},
+                {description_field} = excluded.{description_field}
+            ''', (skill_id, skill_name, description))
+        else:
+            # 武器錬成
+            # 月光のように同じ名前がある場合は0以外のidを指定すること
+            query = f"UPDATE skills SET {description_field} = :description WHERE name = :skill_name"
+            cursor.execute(query, {'description': description, 'skill_name': skill_name})
 
         # 英語名がある場合は入力
         if skill_e_name is not None:
             query = "UPDATE skills SET english_name = :english_name WHERE id = :id"
             cursor.execute(query, {'english_name': skill_e_name, 'id': skill_id})
 
+        # オプションの設定
         if other_field_dict and not is_refinement:
             # フィールドを安全に動的に更新するためのクエリ作成
             set_clause = ", ".join([f"{field} = :{field}" for field in other_field_dict.keys()])
             query = f"UPDATE skills SET {set_clause} WHERE id = :id"
             cursor.execute(query, {**other_field_dict, 'id': skill_id})
+
+        # 武器錬成可能設定
         if is_refinement:
-            query = f'UPDATE skills SET can_status_refine = "true" WHERE id = :id'
-            cursor.execute(query, {'id': skill_id})
+            if skill_id != 0:
+                query = f'UPDATE skills SET can_status_refine = "true" WHERE id = :skill_id'
+                cursor.execute(query, {'id': skill_id})
+            else:
+                query = f'UPDATE skills SET can_status_refine = "true" WHERE name = :skill_name'
+                cursor.execute(query, {'name': skill_name})
+
+        # 特殊錬成のHP設定
         if is_special_refinement:
-            query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE id = :id"
-            cursor.execute(query, {'id': skill_id})
+            if skill_id != 0:
+                query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE id = :skill_id"
+                cursor.execute(query, {'id': skill_id})
+            else:
+                query = f"UPDATE skills SET special_refine_hp = {special_refine_hp} WHERE name = :skill_name"
+                cursor.execute(query, {'name': skill_name})
     conn.commit()
 
 
