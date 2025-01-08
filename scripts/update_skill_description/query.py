@@ -198,17 +198,24 @@ def check_id(conn, data_to_insert, should_check_id):
     id_list = list(map(lambda x: int(x[0].split('-')[0]), data_to_insert))
     if len(id_list) >= 1 and should_check_id:
         # 最大値を取得するクエリ
-        query = f"SELECT MAX(id) FROM skills"
+        query = """
+        SELECT id, name, english_name, type
+        FROM skills
+        WHERE id = (SELECT MAX(id) FROM skills)
+        """
 
         cursor = conn.cursor()
         try:
             cursor.execute(query)
-            max_id = cursor.fetchone()[0]  # 最大値を取得
-            if max_id is None:
+            row = cursor.fetchone()  # 最大値の行を取得
+
+            if row:
+                max_id, name, english_name, skill_type = row
+                print(f"最大のID: {max_id}, 名前: {name}, 英語名: {english_name}, タイプ: {skill_type}")
+                if not (max_id < id_list[0]):
+                    print(warn(f"idが現在の最大値より大きくありません: not {max_id} < {id_list}"))
+            else:
                 print(warn('テーブルが空です。'))
-            print(f"最大のid: {max_id}")
-            if not (max_id < id_list[0]):
-                print(warn(f"idが現在の最大値より大きくありません: not {max_id} < {id_list}"))
         finally:
             cursor.close()
             conn.close()
