@@ -66,6 +66,8 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
             result['effective'] = '|飛行|'
         elif description == '魔法特効':
             result['effective'] = '|魔法|'
+        elif description == '飛行特効無効':
+            result['invalidate_effective'] = '|飛行|'
         elif description == '敵は反撃不可':
             result['disable_counter'] = "true"
     return result
