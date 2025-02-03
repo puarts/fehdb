@@ -1,0 +1,5 @@
+create table cyl9 (rank, name, series, vote_count);
+.mode csv
+.import cyl9.csv cyl9
+
+
