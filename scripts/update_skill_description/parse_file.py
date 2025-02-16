@@ -178,7 +178,7 @@ def _set_count(count_str: str, result: dict):
 
 
 def _set_might(might_str: str, result: dict):
-    match = re.search(r'威力\s*[:：]\s*(?P<num>\d+)', might_str)
+    match = re.search(r'威力\s*[:：]?\s*(?P<num>\d+)', might_str)
     if match:
         result['might'] = int(match.group('num'))
 
