@@ -64,6 +64,8 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
             result['counteratk_count'] = 2
         elif description == '飛行特効':
             result['effective'] = '|飛行|'
+        elif description == '騎馬特効':
+            result['effective'] = '|騎馬|'
         elif description == '魔法特効':
             result['effective'] = '|魔法|'
         elif description == '飛行特効無効':
