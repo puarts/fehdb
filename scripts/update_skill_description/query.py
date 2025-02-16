@@ -26,11 +26,15 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
             skill_e_name = split[3]
         print(skill_id, skill_e_name, refinement_type, skill_name, description)
         fields = ''
-        is_refinement = False
+        is_refinement = False  # 新規追加と錬成が同時な場合はFalse、is_new_refinementがTrue
         is_special_refinement = False
+        is_new_refinement = False
         special_refine_hp = 0
         if refinement_type == 'n':
             fields = ['id', 'name', 'description']
+        elif refinement_type == 'nr':
+            fields = ['id', 'name', 'description']
+            is_new_refinement = True
         elif refinement_type == 'r':
             fields = ['id', 'name', 'refine_description']
             is_refinement = True
@@ -61,6 +65,10 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
             # 月光のように同じ名前がある場合は0以外のidを指定すること
             query = f"UPDATE skills SET {description_field} = :description WHERE name = :skill_name"
             cursor.execute(query, {'description': description, 'skill_name': skill_name})
+        # 錬成と追加が同時な場合（錬成のスキルテキストが複数存在しない）は錬成にも通常と同じスキルテキストを入れる
+        if is_new_refinement:
+            query = f"UPDATE skills SET refine_description = :description WHERE name = :skill_name"
+            cursor.execute(query, {'description': description, 'skill_name': skill_name})
 
         # 英語名がある場合は入力
         if skill_e_name is not None:
@@ -68,7 +76,7 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
             cursor.execute(query, {'english_name': skill_e_name, 'id': skill_id})
 
         # オプションの設定
-        if other_field_dict and not is_refinement:
+        if other_field_dict and (not is_refinement or is_new_refinement):
             # フィールドを安全に動的に更新するためのクエリ作成
             set_clause = ", ".join([f"{field} = :{field}" for field in other_field_dict.keys()])
             query = f"UPDATE skills SET {set_clause} WHERE id = :id"
