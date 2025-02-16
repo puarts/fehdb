@@ -64,10 +64,14 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
             result['counteratk_count'] = 2
         elif description == '飛行特効':
             result['effective'] = '|飛行|'
+        elif description == '騎馬特効':
+            result['effective'] = '|騎馬|'
         elif description == '魔法特効':
             result['effective'] = '|魔法|'
         elif description == '飛行特効無効':
             result['invalidate_effective'] = '|飛行|'
+        elif description == '竜特効無効':
+            result['invalidate_effective'] = '|竜|'
         elif description == '敵は反撃不可':
             result['disable_counter'] = "true"
     return result
@@ -176,7 +180,7 @@ def _set_count(count_str: str, result: dict):
 
 
 def _set_might(might_str: str, result: dict):
-    match = re.search(r'威力\s*[:：]\s*(?P<num>\d+)', might_str)
+    match = re.search(r'威力\s*[:：]?\s*(?P<num>\d+)', might_str)
     if match:
         result['might'] = int(match.group('num'))
 
