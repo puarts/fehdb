@@ -23,7 +23,8 @@ def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
         skill_id, refinement_type, skill_name, *rest = split
         skill_e_name = None
         if len(split) == 4:
-            skill_e_name = split[3]
+            # ex) Spring-Air => Spring=Air => Spring-Air
+            skill_e_name = split[3].replace('=', '-')
         print(skill_id, skill_e_name, refinement_type, skill_name, description)
         fields = ''
         is_refinement = False  # 新規追加と錬成が同時な場合はFalse、is_new_refinementがTrue
@@ -171,7 +172,8 @@ def print_simulator_code(data_to_insert):
         skill_id = header[0]
         skill_name = header[2]
         if len(header) >= 4:
-            skill_e_name = header[3]
+            # ex) Spring-Air => Spring=Air => Spring Air
+            skill_e_name = header[3].replace('=', ' ')
         else:
             skill_e_name = skill_name
         skill_e_name = to_pascal_case(skill_e_name)
