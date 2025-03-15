@@ -153,6 +153,7 @@ def main():
         check_weapon(data_to_insert)
         check_might(data_to_insert)
         check_special(data_to_insert)
+        check_assist_type(data_to_insert)
         print('[変換結果]')
         print('\n'.join(map(str, data_to_insert)))
 
@@ -272,6 +273,14 @@ def check_special(lines: List[Tuple[str, str, dict]]):
         name, _, d = line
         if 'type' in d and d['type'] == '奥義' and not 'count' in d:
             print(warn(f"カウントがありません. name: {name}, d: {d}"))
+
+
+def check_assist_type(lines: List[Tuple[str, str, dict]]):
+    for line in lines:
+        name, _, d = line
+        if 'type' in d and d['type'] == 'サポート' and not 'assist_type' in d:
+            print(warn(f"補助タイプがありません. name: {name}, d: {d}"))
+            print(warn('ex) a=refresh a=move a=rally a=heal a=restore a=donor_heal'))
 
 
 def type_symbol(type_str):
