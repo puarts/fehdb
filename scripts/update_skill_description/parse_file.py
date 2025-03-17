@@ -163,6 +163,21 @@ def _set_type(type_str: str, result: dict):
         result['type'] = '奥義'
     if type_str == 'a':
         result['type'] = 'サポート'
+    if type_str.startswith('a='):
+        result['type'] = 'サポート'
+        assist_type = type_str.split('=')[1]
+        if assist_type == 'move':
+            result['assist_type'] = 'Move'
+        if assist_type == 'refresh':
+            result['assist_type'] = 'Refresh'
+        if assist_type == 'rally':
+            result['assist_type'] = 'Rally'
+        if assist_type == 'heal':
+            result['assist_type'] = 'Heal'
+        if assist_type == 'restore':
+            result['assist_type'] = 'Restore'
+        if assist_type == 'donor_heal':
+            result['assist_type'] = 'DonorHeal'
     if type_str == 'pa':
         result['type'] = 'パッシブA'
     if type_str == 'pb':
