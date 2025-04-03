@@ -2,7 +2,7 @@ import re
 from typing import List
 from typing import Tuple
 
-from replace import REPLACEMENTS
+from replace import REPLACEMENTS, SKILL_NAME_REPLACEMENTS
 from replace import replace
 
 
@@ -36,11 +36,15 @@ def parse_entry(entry: str) -> Tuple[str, str, dict]:
     skill_lines = [line for line in entries if not line.strip().startswith('#')]
     fields_comments = [line for line in entries if line.strip().startswith('##')]
     if len(skill_lines) >= 2:
-        entry_id = skill_lines[0].strip()  # 1行目がentry_id
+        entry_id_line = skill_lines[0].strip()  # 1行目がentry_id
         description = "\n".join(skill_lines[1:]).strip()  # 2行目以降をdescriptionとして結合
         replaced = replace(description, REPLACEMENTS)
         field_dict = get_field_dict(replaced.split('<br>'), fields_comments)
-        return entry_id, replaced, field_dict
+
+        entries = entry_id_line.split('-')
+        entries[2] = replace(entries[2], SKILL_NAME_REPLACEMENTS)
+        entry_id_line = '-'.join(entries)
+        return entry_id_line, replaced, field_dict
 
 
 def get_field_dict(descriptions: List[str], fields_comments: List[str]) -> dict:
