@@ -171,7 +171,11 @@ def print_simulator_code(data_to_insert):
         # print(f"data0: {data[0].split('-')}")
         header = data[0].split('-')
         skill_id = header[0]
+        refine_type = header[1]
         skill_name = header[2]
+        # 特殊錬成もしくはIDが指定されていない場合は出力しない
+        if not (refine_type == 'n' or refine_type == 'r') or skill_id == '0':
+            continue
         if len(header) >= 4:
             # ex) Spring-Air => Spring=Air => Spring Air
             skill_e_name = header[3].replace('=', ' ')

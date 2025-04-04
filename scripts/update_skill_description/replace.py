@@ -77,6 +77,9 @@ REPLACEMENTS = [
     ('\r\n', '<br>'),  # Windows の CRLF をスペースに置換
 ]
 
+SKILL_NAME_REPLACEMENTS = [
+    ('•', '・'),
+]
 
 def replace(input_text, replacements):
     result = input_text
