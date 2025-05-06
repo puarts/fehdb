@@ -80,6 +80,8 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
             result['invalidate_effective'] = '|竜|'
         elif description == '敵は反撃不可':
             result['disable_counter'] = "true"
+        elif description == '杖は他の武器同様のダメージ計算になる':
+            result['wrathful_staff'] = "true"
     return result
 
 
