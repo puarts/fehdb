@@ -194,7 +194,8 @@ def to_pascal_case(sentence):
     # アルファベットのみに変換
     sentence = unidecode(sentence)
 
-    sentence = sentence.replace("/", " ").replace("+", " Plus")
+    sentence = (
+        sentence.replace("/", " ").replace("+", " Plus").replace("&", "And"))
 
     # 単語を変数名に適した形に変換した後に単語から不要な記号を削除
     words = [re.sub(r'[^a-zA-Z0-9\s]', '', replace_skill_word(word)) for word in sentence.split()]
