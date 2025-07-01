@@ -66,6 +66,7 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
         elif description == '2回攻撃(敵から攻撃された時も、2回攻撃可能)':
             result['atk_count'] = 2
             result['counteratk_count'] = 2
+        # 特効
         elif description == '竜特効':
             result['effective'] = '|竜|'
         elif description == '飛行特効':
@@ -74,12 +75,13 @@ def get_field_dict_from_description(descriptions: List[str]) -> dict:
             result['effective'] = '|騎馬|'
         elif description == '魔法特効':
             result['effective'] = '|魔法|'
+        elif description == '重装、騎馬特効':
+            result['effective'] = '|重装|騎馬|'
+        # 特効無効
         elif description == '飛行特効無効':
             result['invalidate_effective'] = '|飛行|'
         elif description == '竜特効無効':
             result['invalidate_effective'] = '|竜|'
-        elif description == '重装、騎馬特効':
-            result['invalidate_effective'] = '|重装|騎馬|'
         elif description == '敵は反撃不可':
             result['disable_counter'] = "true"
         elif description == '杖は他の武器同様のダメージ計算になる':
