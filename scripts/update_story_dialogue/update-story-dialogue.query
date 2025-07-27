@@ -1,6 +1,6 @@
 create table story_dialogues_tmp ( book,chapter,part,scene,speaker,dialogue);
 .mode csv
-.import ../../sources/story-dialogue/book6-tt-Ending.csv story_dialogues_tmp
+.import ../../sources/story-dialogue/book9-09.csv story_dialogues_tmp
 
 INSERT INTO story_dialogues (book,chapter,part,scene,speaker,dialogue)
 SELECT book,chapter,part,scene,speaker,dialogue
