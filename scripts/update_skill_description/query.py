@@ -155,7 +155,8 @@ def main():
         check_special(data_to_insert)
         check_assist_type(data_to_insert)
         print('[変換結果]')
-        print('\n'.join(map(str, data_to_insert)))
+        # print('\n'.join(map(str, data_to_insert)))
+        pretty_print_skill(data_to_insert)
 
         print('')
         print('[シミュレーター用出力]')
@@ -215,10 +216,10 @@ def check_id(conn, data_to_insert, should_check_id):
     if len(id_list) >= 1 and should_check_id:
         # 最大値を取得するクエリ
         query = """
-        SELECT id, name, english_name, type
-        FROM skills
-        WHERE id = (SELECT MAX(id) FROM skills)
-        """
+                SELECT id, name, english_name, type
+                FROM skills
+                WHERE id = (SELECT MAX(id) FROM skills) \
+                """
 
         cursor = conn.cursor()
         try:
@@ -303,6 +304,26 @@ def type_symbol(type_str):
         return 'PassiveC'
     if type_str == '響心':
         return 'PassiveX'
+    return None
+
+
+def pretty_print_skill(data_list):
+    for data in data_list:
+        name, description, details = data
+
+        print("=== Skill Information ===")
+        print(f"Name: {name}")
+        print()
+
+        print("Description:")
+        # <br>タグを改行に変換して読みやすく
+        print(description.replace("<br>", "\n"))
+        print()
+
+        print("Details:")
+        # details（辞書）を整形して出力
+        for key, value in details.items():
+            print(f"  {key}: {value}")
 
 
 if __name__ == '__main__':
