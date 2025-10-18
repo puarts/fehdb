@@ -308,7 +308,7 @@ def type_symbol(type_str):
 
 
 def pretty_print_skill(data_list):
-    for data in data_list:
+    for i, data in enumerate(data_list):
         name, description, details = data
 
         print("=== Skill Information ===")
@@ -325,6 +325,9 @@ def pretty_print_skill(data_list):
         for key, value in details.items():
             print(f"  {key}: {value}")
 
+        # 最後の要素以外なら改行を追加
+        if i < len(data_list) - 1:
+            print()
 
 if __name__ == '__main__':
     main()
