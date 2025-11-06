@@ -7,7 +7,7 @@ from typing import List, Tuple
 from unidecode import unidecode
 
 from parse_file import parse_file
-from util import warn
+from util import warn, cyan_text, green_text
 
 
 def insert_data(conn, data: List[Tuple[str, str, dict]]) -> None:
@@ -311,7 +311,7 @@ def pretty_print_skill(data_list):
     for i, data in enumerate(data_list):
         name, description, details = data
 
-        print("=== Skill Information ===")
+        print(green_text("===== スキル情報 ====="))
         print(f"Name: {name}")
         print()
 
