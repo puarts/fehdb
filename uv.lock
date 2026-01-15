@@ -2,6 +2,12 @@ version = 1
 revision = 3
 requires-python = ">=3.12"
 
+[manifest]
+members = [
+    "fehdb",
+    "update-skill-description",
+]
+
 [[package]]
 name = "fehdb"
 version = "0.1.0"
@@ -21,3 +27,14 @@ sdist = { url = "https://files.pythonhosted.org/packages/94/7d/a8a765761bbc0c836
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8f/b7/559f59d57d18b44c6d1250d2eeaa676e028b9c527431f5d0736478a73ba1/Unidecode-1.4.0-py3-none-any.whl", hash = "sha256:c3c7606c27503ad8d501270406e345ddb480a7b5f38827eafe4fa82a137f0021", size = 235837, upload-time = "2025-04-24T08:45:01.609Z" },
 ]
+
+[[package]]
+name = "update-skill-description"
+version = "0.1.0"
+source = { virtual = "scripts/update_skill_description" }
+dependencies = [
+    { name = "unidecode" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "unidecode", specifier = ">=1.4.0" }]
