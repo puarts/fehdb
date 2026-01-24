@@ -105,15 +105,22 @@ def create_skill_info_split(skill_db_path):
         return "[" + ", ".join(effects) + ",]"
 
     # --- 4. AssistType Mapping ---
-    def get_assist_type(jp_assist):
-        if not jp_assist: return 'AssistType.None'
-        if '再行動' in jp_assist: return 'AssistType.Refresh'
-        if '回復' in jp_assist: return 'AssistType.Heal'
-        if '献身' in jp_assist or '相互援助' in jp_assist: return 'AssistType.DonorHeal'
-        if '応援' in jp_assist: return 'AssistType.Rally'
-        if any(x in jp_assist for x in ['移動', '引き寄せ', '引き戻し', '体当たり', 'ぶちかまし', '入れ替え']):
+    def get_assist_type(assist):
+        if not assist: return 'AssistType.None'
+        if 'Refresh' in assist: return 'AssistType.Refresh'
+        if 'Move' in assist: return 'AssistType.Move'
+        if 'Rally' in assist: return 'AssistType.Rally'
+        if 'DonorHeal' in assist: return 'AssistType.DonorHeal'
+        if 'Heal' in assist: return 'AssistType.Heal'
+        if 'Restore' in assist: return 'AssistType.Restore'
+
+        if '再行動' in assist: return 'AssistType.Refresh'
+        if '回復' in assist: return 'AssistType.Heal'
+        if '献身' in assist or '相互援助' in assist: return 'AssistType.DonorHeal'
+        if '応援' in assist: return 'AssistType.Rally'
+        if any(x in assist for x in ['移動', '引き寄せ', '引き戻し', '体当たり', 'ぶちかまし', '入れ替え']):
             return 'AssistType.Move'
-        if 'レスト' in jp_assist: return 'AssistType.Restore'
+        if 'レスト' in assist: return 'AssistType.Restore'
         return 'AssistType.None'
 
     # --- Inheritable MoveType Logic ---
@@ -174,7 +181,7 @@ def create_skill_info_split(skill_db_path):
             might = row['might'] if row['might'] else 0
             might_refine = row['might_refine'] if row['might_refine'] else might
 
-            special_count = 0
+            special_count = row['count'] if row['count'] is not None else 0
             cd_count = row['cooldown_count'] if row['cooldown_count'] is not None else 0
 
             atk_count = row['atk_count'] if row['atk_count'] else 1
