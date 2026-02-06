@@ -129,9 +129,23 @@ def create_hero_info_js_variable(hero_db_path, skill_db_path):
             is_melee = any(mw in raw_weapon for mw in ['剣', '槍', '斧', '竜', '獣'])
             range_val = 1 if is_melee else 2
 
-            hp, atk, spd, df, res = row['hp_5'], row['atk_5'], row['spd_5'], row['def_5'], row['res_5']
-            hp1, atk1, spd1, df1, res1 = row['hp_5_lv1'], row['atk_5_lv1'], row['spd_5_lv1'], row['def_5_lv1'], row[
-                'res_5_lv1']
+            # Lv 40 (または基準値)
+            hp, atk, spd, df, res = (
+                row['hp_5'] or 40,
+                row['atk_5'] or 35,
+                row['spd_5'] or 35,
+                row['def_5'] or 35,
+                row['res_5'] or 35
+            )
+
+            # Lv 1
+            hp1, atk1, spd1, df1, res1 = (
+                row['hp_5_lv1'] or 15,
+                row['atk_5_lv1'] or 10,
+                row['spd_5_lv1'] or 10,
+                row['def_5_lv1'] or 10,
+                row['res_5_lv1'] or 10
+            )
 
             skill_names = parse_skill_string(row['skills'])
             s_dict = classify_skills(skill_names)
@@ -157,6 +171,8 @@ def create_hero_info_js_variable(hero_db_path, skill_db_path):
             release_date = row['release_date']
             is_resplendent = 'true' if row['resplendent'] else 'false'
 
+            special_type = row['special_type'].strip() if row['special_type'] else ""
+
             # インデント(スペース2つ)をつけて可読性を向上
             line = (f"  new HeroInfo('{name}', '{thumb}', {move_type}, '{w_type_str}', {range_val}, "
                     f"{hp}, {atk}, {spd}, {df}, {res}, "
@@ -167,7 +183,8 @@ def create_hero_info_js_variable(hero_db_path, skill_db_path):
                     f"{bst}, {format_array(s_dict['weapon'])}, {format_array(s_dict['assist'])}, "
                     f"{internal_id}, {is_resplendent}, '{origin}', '{how_to_get}', '{release_date}', "
                     f"{format_array(s_dict['special'])}, {format_array(s_dict['a'])}, "
-                    f"{format_array(s_dict['b'])}, {format_array(s_dict['c'])}, {format_array(s_dict['x'])}"
+                    f"{format_array(s_dict['b'])}, {format_array(s_dict['c'])}, {format_array(s_dict['x'])}, "
+                    f"'{special_type}'"
                     f")")
             output_lines.append(line)
 
