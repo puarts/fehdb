@@ -1,0 +1,6 @@
+drop table cyl10;
+create table cyl10 (rank, name, series, vote_count);
+.mode csv
+.import ../../sources/cyl-vote/cyl10.csv cyl10
+
+
