@@ -1,0 +1,16 @@
+[project]
+name = "extract-from-video"
+version = "0.1.0"
+description = "FEH公式動画からスキルテキストを自動抽出"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.42.0",
+    "google-genai>=1.0.0",
+    "ollama>=0.4.0",
+    "Pillow>=11.0.0",
+    "imagehash>=4.3.1",
+]
+
+[project.optional-dependencies]
+ocr-apple = ["ocrmac>=1.0.0"]
+ocr-tesseract = ["pytesseract>=0.3.10"]
