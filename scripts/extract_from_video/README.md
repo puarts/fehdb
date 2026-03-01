@@ -16,9 +16,11 @@ YouTube動画 (JP/EN)
 スキル画面候補フレーム
   ↓ パーセプチュアルハッシュで重複除去 + スクロール検出
 代表フレーム (20〜35枚)
-  ↓ OCR（Claude Vision API / Ollama VLM）
+  ↓ （オプション）ローカルOCRヒント（Apple Vision / Tesseract）
+OCRヒント付きフレーム
+  ↓ OCR（Claude Vision API / Gemini Vision API / Ollama VLM）
 構造化JSONデータ
-  ↓ JP/ENマッチング + テキスト正規化
+  ↓ 過剰分割行のマージ + JP/ENマッチング + テキスト正規化
 sources/skill-desc/{date}.txt
 ```
 
@@ -29,6 +31,7 @@ sources/skill-desc/{date}.txt
 - `yt-dlp` — YouTube動画ダウンロード
 - `ffmpeg` — 静止区間検出・フレーム抽出
 - `ANTHROPIC_API_KEY` 環境変数 — Claude Vision API用（`--ocr claude` 時）
+- `GOOGLE_GENAI_API_KEY` 環境変数 — Gemini Vision API用（`--ocr gemini` 時）
 - [Ollama](https://ollama.com/) — ローカルVLM用（`--ocr ollama` 時、オプション）
 
 ```bash
@@ -91,6 +94,16 @@ uv run python main.py \
 uv run python main.py --jp-url "..." --dry-run
 ```
 
+### Gemini Vision APIでOCR
+
+```bash
+# デフォルトモデル（gemini-3-flash-preview）
+uv run python main.py --jp-video /path/to/jp.mp4 --ocr gemini
+
+# モデル指定
+uv run python main.py --jp-video /path/to/jp.mp4 --ocr gemini --gemini-model gemini-2.5-flash
+```
+
 ### Ollama（ローカルVLM）でOCR
 
 ```bash
@@ -124,6 +137,18 @@ ollama pull qwen2.5vl
 
 > **メモリ目安**: 7B/8Bモデルは8GB以上、32Bモデルは32GB以上のメモリ（またはVRAM）を推奨。
 
+### ローカルOCRヒント付きで実行
+
+VLMの精度向上のため、ローカルOCRエンジンの結果をヒントとして渡せる:
+
+```bash
+# Apple Vision（macOSのみ）
+uv run python main.py --jp-video /path/to/jp.mp4 --ocr gemini --local-ocr apple
+
+# 自動検出（利用可能なエンジンを自動選択）
+uv run python main.py --jp-video /path/to/jp.mp4 --ocr ollama --local-ocr auto
+```
+
 ### フレーム抽出のみ（OCRなし）
 
 ```bash
@@ -147,8 +172,11 @@ uv run python main.py --jp-video /path/to/jp.mp4 --frames-only
 | `--frames-only` | フレーム抽出・スキル画面検出まで実行（OCRは行わない） | — |
 | `--keep-frames` | 処理後にフレーム画像を残す | — |
 | `--min-duration` | 静止区間の最低秒数（短い静止を無視） | 1.5秒 |
-| `--ocr` | OCRバックエンド（`claude` or `ollama`） | `claude` |
+| `--ocr` | OCRバックエンド（`claude`, `gemini`, `ollama`） | `claude` |
+| `--gemini-model` | Geminiモデル名 | `gemini-3-flash-preview` |
 | `--ollama-model` | Ollamaモデル名 | `qwen2.5vl` |
+| `--local-ocr` | ローカルOCRでVLMにヒント提供（`auto`, `apple`, `tesseract`, `none`） | `none` |
+| `--id` | キャッシュ識別子（動画ごとにキャッシュを分離） | — |
 
 `--jp-url` と `--jp-video` はどちらか一方が必須。EN側は省略可（英語名なしで出力される）。
 
@@ -177,9 +205,13 @@ uv run python main.py --jp-video /path/to/jp.mp4 --frames-only
 | `frames.py` | ffmpeg freezedetectによる静止区間検出、色分析によるスキル画面検出、パーセプチュアルハッシュで重複除去 |
 | `ocr.py` | OCRバックエンド共通インターフェース（Protocol）、ファクトリ、共有ユーティリティ |
 | `ocr_claude.py` | Claude Vision APIバックエンド（JP: 個別リクエスト、EN: バッチ処理） |
+| `ocr_gemini.py` | Gemini Vision APIバックエンド |
 | `ocr_ollama.py` | Ollama VLMバックエンド（ローカル実行） |
+| `local_ocr.py` | ローカルOCRエンジン（Apple Vision / Tesseract）によるVLMヒント生成 |
+| `line_merger.py` | VLMが過剰分割した行のマージ後処理（行頭パターンのホワイトリストで判定） |
 | `formatter.py` | OCR結果を `.txt` フォーマットに変換、JP/ENマッチング、テキスト正規化 |
 | `models.py` | データクラス定義（`ExtractedSkill`, `FrameGroup`, `VideoInfo`） |
+| `run.sh` | ショートカットスクリプト（`<id> <jp-url> <en-url>` で実行） |
 
 ## キャリブレーション
 
@@ -193,15 +225,20 @@ uv run python main.py --jp-video /path/to/jp.mp4 --frames-only
 
 ```python
 # 色分析の閾値
-DARK_PIXEL_THRESHOLD = 80    # 暗色判定のRGB平均値
-BRIGHT_PIXEL_THRESHOLD = 200  # 明色判定のRGB平均値
-MIN_DARK_RATIO = 0.30         # 暗色ピクセルの最低比率
-MIN_BRIGHT_RATIO = 0.08       # 明色ピクセルの最低比率
+DARK_PIXEL_THRESHOLD = 80     # 暗色判定のRGB平均値
+BRIGHT_PIXEL_THRESHOLD = 200   # 明色判定のRGB平均値
+MIN_DARK_RATIO = 0.12          # 暗色ピクセルの最低比率
+MIN_BRIGHT_RATIO = 0.08        # 明色ピクセルの最低比率
+
+# 水平エッジ検出の閾値
+ROW_GRADIENT_THRESHOLD = 15    # 隣接行の輝度差がこれ以上でエッジとみなす
+MIN_GAP_BETWEEN_EDGES = 10     # エッジ行のグルーピング間隔
+MIN_HORIZONTAL_LINES = 7       # スキル画面と判定する最小水平線数
 
 # 重複除去・スクロール検出の閾値
 HASH_THRESHOLD = 8             # ハミング距離しきい値
-SCROLL_NAME_THRESHOLD = 5     # スキル名一致の閾値（低い=一致）
-SCROLL_DESC_THRESHOLD = 10    # 説明文差異の閾値（高い=異なる）
+SCROLL_NAME_THRESHOLD = 5      # スキル名一致の閾値（低い=一致）
+SCROLL_DESC_THRESHOLD = 10     # 説明文差異の閾値（高い=異なる）
 ```
 
 `--frames-only` または `--keep-frames` で抽出フレームを残し、検出精度を目視確認できる。
@@ -213,6 +250,10 @@ SCROLL_DESC_THRESHOLD = 10    # 説明文差異の閾値（高い=異なる）
 - JP（1スキル1リクエスト × 約30スキル）: 約$0.30〜$1.00
 - EN（バッチ処理）: 約$0.05〜$0.10
 - 合計: 1回の新英雄動画処理で約$0.35〜$1.10
+
+### Gemini（`--ocr gemini`）
+
+Gemini Flash系モデルは低コスト。詳細は [Gemini API pricing](https://ai.google.dev/pricing) を参照。
 
 ### Ollama（`--ocr ollama`）
 

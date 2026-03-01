@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-ファイアーエムブレム ヒーローズ (FEH) のデータベース管理システム。英雄のステータス、スキルデータ、ストーリーの会話、CYL投票結果をSQLiteデータベースで管理する。ゲームのスクリーンショットからOCRでスキル説明文を取り込む処理パイプラインと、外部の戦闘シミュレータ向けにTypeScript/JavaScriptデータを出力するコードジェネレータを含む。
+ファイアーエムブレム ヒーローズ (FEH) のデータベース管理システム。英雄のステータス、スキルデータ、ストーリーの会話、CYL投票結果をSQLiteデータベースで管理する。公式紹介動画やゲームスクリーンショットからOCRでスキル説明文を取り込む処理パイプラインと、外部の戦闘シミュレータ向けにTypeScript/JavaScriptデータを出力するコードジェネレータを含む。
 
 ゲームデータおよびコメントはすべて日本語。
 
@@ -28,18 +28,33 @@ python create_skill_info.py
 
 # 誕生日TSVファイルの生成
 python scripts/python/create_birthday_list_tsv.py
+
+# 公式動画からスキル説明文を自動抽出（詳細は scripts/extract_from_video/README.md）
+cd scripts/extract_from_video
+uv run python main.py --jp-url "<JP動画URL>" --en-url "<EN動画URL>" -o "<出力ファイル名>"
 ```
 
 ## アーキテクチャ
 
-### スキル説明文パイプライン
+### 動画自動抽出パイプライン（`scripts/extract_from_video/`）
 
-ゲームスクリーンショットのOCR結果を構造化されたデータベースエントリに変換するワークフロー：
+公式紹介動画からスキル説明文を自動抽出し、`query.py` 互換の `.txt` ファイルを出力する：
 
-1. **OCR → 生テキストファイル** (`sources/skill-desc/*-orig/`) — OCRの生出力
-2. **replace.py** — テキスト正規化：110以上のOCR文字誤りの修正、全角→半角変換、スペース除去、改行を`<br>`に変換
-3. **parse_file.py** — 正規化テキストを構造化されたスキルエントリにパース：スキルID、名前、錬成タイプ、メタデータコメント（武器種、威力、ステータス）を抽出
-4. **query.py** — パースされた説明文で `feh-skills.sqlite3` を挿入・更新
+1. **yt-dlp** — YouTube動画ダウンロード（1080p）
+2. **ffmpeg freezedetect** — 静止区間検出 → 中間フレーム抽出
+3. **色分析 + パーセプチュアルハッシュ** — スキル画面候補の検出・重複除去
+4. **OCR**（Claude Vision API / Ollama VLM）— フレーム画像から構造化JSONデータを抽出
+5. **JP/ENマッチング + テキスト正規化** → `sources/skill-desc/{date}.txt` を出力
+
+詳細は `scripts/extract_from_video/README.md` を参照。
+
+### スキル説明文パイプライン（`scripts/update_skill_description/`）
+
+OCR結果のテキストファイルを構造化されたデータベースエントリに変換するワークフロー：
+
+1. **replace.py** — テキスト正規化：OCR文字誤りの修正、全角→半角変換、スペース除去、改行を`<br>`に変換
+2. **parse_file.py** — 正規化テキストを構造化されたスキルエントリにパース：スキルID、名前、錬成タイプ、メタデータコメント（武器種、威力、ステータス）を抽出
+3. **query.py** — パースされた説明文で `feh-skills.sqlite3` を挿入・更新
 
 ### スキル説明文ファイルフォーマット
 
@@ -71,7 +86,7 @@ python scripts/python/create_birthday_list_tsv.py
 
 ## 規約
 
-- Python 3.12+、`uv` ワークスペースで管理（ルートに `pyproject.toml`、`scripts/update_skill_description/` がワークスペースメンバー）
+- Python 3.12+、`uv` ワークスペースで管理（ルートに `pyproject.toml`、`scripts/update_skill_description/` と `scripts/extract_from_video/` がワークスペースメンバー）
 - SQLiteは生SQL使用（ORMなし）。真偽値は文字列 `'true'`/`'false'` で保存
 - 配列的なフィールドはパイプ `|` を区切り文字として使用
 - コミットメッセージは日本語（例：「DB更新」）
