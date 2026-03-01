@@ -14,3 +14,10 @@ sqlite3 ./../feh-skills.sqlite3 <<EOF
 SELECT id, name, english_name, description, refine_description, special_refine_description FROM skills;
 EOF
 
+sqlite3 ./../feh-heroes.sqlite3 <<EOF
+.headers ON
+.mode csv
+.output feh-heroes.csv
+SELECT * FROM heroes;
+EOF
+
