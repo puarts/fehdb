@@ -8,10 +8,15 @@ dependencies = [
     "unidecode>=1.3.8",
 ]
 
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
 [tool.uv]
 managed = true
 
 [tool.uv.workspace]
 members = [
     "scripts/update_skill_description",
+    "scripts/extract_from_video",
 ]

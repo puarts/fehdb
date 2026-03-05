@@ -1,0 +1,121 @@
+Spring Thorn
+Weapon
+Accelerates Special trigger (cooldown count-1).
+For foes within 3 rows or 3 columns centered on unit, inflicts Atk/Spd/Def/Res-5, neutralizes effects that grant “Special cooldown charge +X,” foe suffers +10 damage (excluding area-of-effect Specials), and foe cannot make a follow-up attack during combat.
+Grants Atk/Spd/Def/Res+10 to unit, unit deals +25 damage (excluding area-of-effect Specials), reduces damage from foe's attacks by 15 (excluding area-of-effect Specials), reduces damage from foe's Specials by an additional 15 (excluding area-of-effect Specials), unit makes a guaranteed follow-up attack, and grants Special cooldown count-2 to unit before unit's first attack during combat.
+
+Divine Specter
+Passive A
+Enables 【Canto (Dist. +1; Max 4)】 .
+If unit initiates combat or if there is an ally within 3 rows or 3 columns centered on unit, grants Atk/Def+10 to unit, unit deals +X × 4 damage (excluding area-of-effect Specials), and reduces damage from foe's first attack by X × 3 during combat (“first attack” normally means only the first strike; for effects that grant “unit attacks twice,” it means the first and second strikes; X = number of allies within 3 rows or 3 columns centered on unit; max 3).
+
+Heavenly Soar
+Passive B
+Unit can move through foes' spaces.
+For each foe within 5 spaces of unit, unit can move to any of the nearest spaces adjacent to that foe (unless space is impassable terrain).
+Inflicts Atk/Spd/Def-4 on foe, neutralizes effects that grant "Special cooldown charge +X" to foe, unit deals damage = 20% of the greater of unit's Spd or Def (excluding area-of-effect Specials), and reduces damage from foe's attacks by 20% of the greater of unit's Spd or Def during combat (excluding area-of-effect Specials).
+
+World Destroyer
+Passive C
+Neutralizes "effective against flying" bonuses.
+Unit can counterattack regardless of foe's range.
+Allies within 2 spaces of unit can move to a space within 2 spaces of unit.
+For unit and allies within 3 rows or 3 columns centered on unit, grants Atk/Spd/Def/Res+5, reduces damage from foe's attacks by 7 (excluding area-of-effect Specials), and next attack deals damage = 40% of foe's first-attack damage prior to reductions during combat (resets at end of combat; only highest value applied; does not stack), and also, if Def ≥ foe's Def+5, disables unit's or ally's skills and foe's skills that change attack priority during combat.
+Unit deals +7 damage (excluding area-of-effect Specials) and grants Special cooldown charge +1 to unit per attack during combat (only highest value applied; does not stack).
+
+Spring Hare Egg+
+Weapon
+At start of player phase or enemy phase, grants Atk/Res+6, 【Preempt Pulse】, and “neutralizes foe’s bonuses during combat” to unit and allies within 2 spaces of unit for 1 turn.
+Grants Atk/Spd/Def/Res+5 to unit, unit deals +20 damage (excluding area-of-effect Specials), and reduces damage from foe’s attacks by 10 during combat (excluding area-of-effect Specials).
+
+A/R Far Resound
+Passive B
+Enables 【Canto (Rem.; Min 1)】.
+Deals damage to unit as combat begins = 20% of X (X = unit’s max HP before entering battle - 20; “max HP before entering battle” means unit’s max HP excluding HP increases from Legendary Effects, Mythic Effects, Bonus Heroes, etc.; activates only when unit can attack in combat; effects that reduce damage “during combat” do not apply; will not reduce unit’s HP below 1).
+Inflicts Atk/Res-4 on foe, unit deals damage = unit’s HP at start of combat - current HP, × 2 (max 12, min 6; excluding area-of-effect Specials) and reduces the percentage of foe’s non-Special “reduce damage by X%” skills by percentage = unit’s HP at start of combat - current HP, × 10 during combat (max 60%, min 30%; excluding area-of-effect Specials).
+
+Shadow Shift 3
+Passive C
+If unit’s HP ≥ 25%, when Canto triggers, enables unit to use 【Reposition】 on ally (this effect is not treated as an Assist skill; if similar effects are active, this effect does not trigger).
+
+Arcane Slicer
+Weapon
+Accelerates Special trigger (cooldown count-1).
+If a skill compares unit's Spd to a foe's or ally's Spd, treats unit's Spd as if granted +7.
+At start of player phase or enemy phase, grants Atk/Spd+6, 【Pulse Follow】 , and 【Dodge】 to unit and allies within 2 spaces of unit for 1 turn.
+Grants Atk/Spd/Def/Res+15 to unit, unit deals +25 damage (excluding area-of-effect Specials), reduces damage from foe's attacks by 15 (excluding area-of-effect Specials), and reduces the percentage of foe's non-Special “reduce damage by X%” skills by 50% during combat (excluding area-of-effect Specials).
+Effect: 【Dagger 7】
+【Pulse Follow】 Grants Special cooldown count-2 to unit before unit's first follow-up attack during combat.
+
+True Bane
+Special
+When Special triggers, boosts damage by the greater of foe's Spd or Def.
+For unit's first attack during combat, if damage dealt prior to damage reduction calculation < foe's HP - 1, sets damage before damage reduction as foe's HP - 1 (excluding certain foes, such as Røkkr).
+Reduces damage from foe's attacks by 40% (excluding area-of-effect Specials), disables skills of all foes excluding foe in combat, and neutralizes effects that inflict "Special cooldown charge -X" on unit during combat, and also, if decreasing the Spd difference necessary to make a follow-up attack by 10 would allow unit to trigger a follow-up attack (excluding guaranteed or prevented follow-ups), triggers 【Potent Follow 100%】.
+At start of turn, grants Atk/Spd 【Great Talent】 +2 to unit and allies within 3 rows or 3 columns centered on unit.
+After combat, if unit's Special triggered, grants Atk/Spd 【Great Talent】 +4 to unit and allies within 3 rows or 3 columns centered on unit.
+(This skill grants max of 【Great Talent】 +20 for unit and 【Great Talent】 +10 for allies.)
+
+Atk/Spd Waylay
+Passive A
+If unit initiates combat or the number of allies adjacent to unit ≤ 1, grants Atk/Spd+8 to unit during combat, and also, if foe's HP = 100% at start of combat, grants an additional Atk/Spd+2 to unit and unit deals +7 damage during combat (excluding area-of-effect Specials).
+If unit initiates combat or the number of allies adjacent to unit ≤ 1, and if unit's Spd > foe's Spd, neutralizes effects that guarantee foe's follow-up attacks and effects that prevent unit's follow-up attacks during combat.
+
+Disarm Rumor
+Passive B
+At start of turn, and after unit acts (if Canto triggers, after Canto), inflicts Spd/Def-7 and 【Discord】 on closest foes and any foe within 2 spaces of those foes through their next actions.
+Inflicts Spd/Def-4 on foes, unit deals +15 damage (excluding area-of-effect Specials), and reduces damage from foe's first attack by 7 during combat (“first attack” normally means only the first strike; for effects that grant “unit attacks twice,” it means the first and second strikes).
+While attacking in Aether Raids, if unit ends movement on a space with a Bolt Trap or a Heavy Trap, cancels trap's effect; if unit ends movement on a space with a Hex Trap, reduces trap's trigger condition by 10 HP.
+
+Spring Dawning
+Weapon
+Accelerates Special trigger (cooldown count-1).
+At start of player phase or enemy phase, grants 【Empathy】 to unit and allies within 2 spaces of unit for 1 turn.
+After start-of-turn effects trigger on player phase, and after start-of-turn effects trigger on enemy phase (except for in Summoner Duels), for unit and allies within 2 spaces of unit, converts stat penalties into bonuses and neutralizes two Penalty effects (does not apply to Penalty effects that are applied at the same time; neutralizes the first applicable Penalty effects on unit's or ally's list of active effects).
+Grants Atk/Spd/Def/Res+15 to unit, reduces damage from foe's attacks by 15 (excluding area-of-effect Specials), and deals damage = unit's max Special cooldown count value × 12 when Special triggers during combat (excluding area-of-effect Specials).
+Unit can use the following 【Style】 : Spring Dawning Style
+
+Logic
+Special
+Boosts damage by X% of unit's Atk when Special triggers (if 【Penalty】 effects are active on foe, X = 80; otherwise, X = 70).
+If unit initiates combat, reduces damage from foe's attacks by 40% during combat (excluding area-of-effect Specials), and also, if foe has any 【Penalty】 effects active, grants Special cooldown count-1 to unit before unit's first attack during combat.
+
+Atk/Spd Aria
+Passive A
+If unit initiates combat or is within 3 spaces of an ally, grants bonus to unit's Atk/Spd = unit's maximum Special cooldown count + 7 during combat, and also, when unit's Special triggers, deals damage = unit's maximum Special cooldown count × X (excluding area-of-effect Specials; if unit triggers the “unit attacks twice” effect, X = 3; otherwise, X = 5).
+
+Stellar Brace
+Passive B
+Enables 【Canto (Dist.; Max 3, Min 1)】 .
+At start of turn, and after unit acts (if Canto triggers, after Canto), inflicts Spd/Res-7, 【Panic】 , and a penalty that neutralizes non-Special “if foe would reduce unit’s HP to 0, unit survives with 1 HP” effects on closest foes and any foe within 2 spaces of those foes through their next actions.
+Inflicts Atk/Spd/Res-5 on foe, reduces damage from foe’s attacks by 7 (excluding area-of-effect Specials), and neutralizes effects that guarantee foe’s follow-up attacks and effects that prevent unit’s follow-up attacks during combat, and also, when Special triggers, deals damage = X% of the greater of foe’s Spd or Res (X = 20 + unit’s max Special cooldown count value × 10; excluding area-of-effect Specials).
+If unit’s attack can trigger unit’s Special, grants Special cooldown count-Y to unit before unit’s first attack and Special cooldown count-Z to unit before unit’s first follow-up attack during combat (Y = number of Bonus effects active on unit, excluding stat bonuses; max = unit’s Special cooldown count value at start of combat; Z = number of Bonus effects active on unit, excluding stat bonuses - unit’s Special cooldown count value at start of combat; min: 0).
+
+Stellar Brace
+Passive B
+Enables 【Canto (Dist.; Max 3, Min 1)】 .
+At start of turn, and after unit acts (if Canto triggers, after Canto), inflicts Spd/Res-7, 【Panic】 , and a penalty that neutralizes non-Special “if foe would reduce unit’s HP to 0, unit survives with 1 HP” effects on closest foes and any foe within 2 spaces of those foes through their next actions.
+Inflicts Atk/Spd/Res-5 on foe, reduces damage from foe’s attacks by 7 (excluding area-of-effect Specials), and neutralizes effects that guarantee foe’s follow-up attacks and effects that prevent unit’s follow-up attacks during combat and also, when Special triggers, deals damage = X% of the greater of foe’s Spd or Res (X = 20 + unit’s max Special cooldown count value × 10; excluding area-of-effect Specials).
+If unit’s attack can trigger unit’s Special, grants Special cooldown count-Y to unit before unit’s first attack and Special cooldown count-Z to unit before unit’s first follow-up attack during combat (Y = number of Bonus effects active on unit, excluding stat bonuses; max = unit’s Special cooldown count value at start of combat; Z = number of Bonus effects active on unit, excluding stat bonuses - unit’s Special cooldown count value at start of combat; min: 0).
+
+Atk/Spd Liberate
+Passive C
+At start of player phase or enemy phase, grants 【Atk Liberate】 and 【Spd Liberate】 to unit and allies closest to foes (excluding unit) for 1 turn.
+Grants Atk/Spd+4 to unit during combat.
+For unit and allies on the map with the 【Atk Liberate】 or 【Spd Liberate】 effects active, deals damage during combat = number of 【Bonus】 effects active on unit or ally + 5, excluding stat bonuses (max 10; excluding area-of-effect Specials).
+
+Style
+Style
+Unit can use the following 【Style】 :
+———— Spring Dawning Style ————
+Unit can attack foes 3 spaces away (unit cannot attack foes 2 spaces away).
+Unit deals +10 damage and neutralizes foe's “reduces damage by X%” effects from non-Special skills when unit's Special triggers during combat (excluding when dealing damage with an area-of-effect Special).
+Cannot move through spaces within 3 spaces of foe that has triggered the Bulwark effect (does not apply if unit has a Pass skill).
+Unit suffers a counterattack if any of the following conditions are met: foe is armored with Range = 2 or foe can counterattack regardless of unit's range.
+After-combat movement effects do not occur.
+Skill effect's Range is treated as 2. This style can be used only once per turn.
+
+Harmonized Skill
+Harmonized
+Grants 【Resonance: Blades】 to unit and allies from the same titles as unit.
+Inflicts Atk/Spd/Def/Res-7, 【Sabotage】 , and 【Share Spoils+】 on closest foes and any foe within 2 spaces of those foes through their next actions.
