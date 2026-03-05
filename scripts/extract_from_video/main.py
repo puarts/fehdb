@@ -28,7 +28,7 @@ from pathlib import Path
 from download import download_video, load_local_video
 from frames import extract_static_frames, detect_skill_frames, deduplicate_frames
 from ocr import create_backend
-from formatter import format_output, write_output, get_max_skill_id
+from formatter import format_output, format_en_output, write_output, get_max_skill_id
 from models import VideoInfo
 
 SOURCES_DIR = Path(__file__).resolve().parent.parent.parent / "sources" / "skill-desc"
@@ -208,6 +208,7 @@ def _run_pipeline(args, work_dir: Path):
     print("\n[日本語版]")
     jp_skills = backend.ocr_jp_skills(jp_frame_groups, new_only=new_only)
 
+    en_skills = []
     if en_frame_groups:
         print("\n[英語版 OCR]")
         en_skills = backend.ocr_en_skills(en_frame_groups, new_only=new_only)
@@ -241,16 +242,33 @@ def _run_pipeline(args, work_dir: Path):
     print(output_content)
     print("-" * 40)
 
+    # EN出力
+    en_output_content = None
+    if en_skills:
+        en_output_content = format_en_output(en_skills)
+        print()
+        print("[EN出力プレビュー]")
+        print("-" * 40)
+        print(en_output_content)
+        print("-" * 40)
+
     if args.dry_run:
-        print(f"[ドライラン] スキル数: {len(jp_skills)}")
+        print(f"[ドライラン] JP スキル数: {len(jp_skills)}")
+        if en_skills:
+            print(f"[ドライラン] EN スキル数: {len(en_skills)}")
     else:
         if args.output:
-            output_path = str(SOURCES_DIR / args.output)
+            jp_output_path = str(SOURCES_DIR / args.output)
         else:
-            # デフォルトファイル名を生成
-            output_path = str(SOURCES_DIR / _generate_output_name())
-        write_output(output_content, output_path)
-        print(f"完了: {len(jp_skills)} スキルを {output_path} に出力しました")
+            jp_output_path = str(SOURCES_DIR / _generate_output_name())
+        write_output(output_content, jp_output_path)
+        print(f"完了: {len(jp_skills)} スキルを {jp_output_path} に出力しました")
+
+        if en_output_content:
+            en_filename = Path(jp_output_path).stem + "-en" + Path(jp_output_path).suffix
+            en_output_path = str(Path(jp_output_path).parent / en_filename)
+            write_output(en_output_content, en_output_path)
+            print(f"完了: {len(en_skills)} ENスキルを {en_output_path} に出力しました")
 
 
 def _get_video(url: str | None, local_path: str | None, language: str, *, video_dir: Path) -> VideoInfo:

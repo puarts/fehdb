@@ -169,6 +169,57 @@ def _normalize_description(lines: list[str]) -> str:
     return joined
 
 
+import re as _re
+import unicodedata as _unicodedata
+
+# 空白 + Unicode不可視文字（ゼロ幅スペース, BOM, ソフトハイフン等）を除去
+_INVISIBLE_RE = _re.compile(r'[\s\u200b\u200c\u200d\u2060\ufeff\u00ad]+')
+
+# OCR揺れで頻出するUnicode句読点バリエーションを ASCII に統一
+_PUNCT_TABLE = str.maketrans({
+    '\u2018': "'",   # '
+    '\u2019': "'",   # '
+    '\u201c': '"',   # "
+    '\u201d': '"',   # "
+    '\u2010': '-',   # ‐ (hyphen)
+    '\u2011': '-',   # ‑ (non-breaking hyphen)
+    '\u2012': '-',   # ‒ (figure dash)
+    '\u2013': '-',   # – (en dash)
+    '\u2014': '-',   # — (em dash)
+    '\u2212': '-',   # − (minus sign)
+})
+
+
+def _dedup_key(skill: ExtractedSkill) -> str:
+    """重複判定用のキーを生成（Unicode正規化 + 不可視文字・句読点揺れ除去）"""
+    name = skill.en_name or skill.jp_name
+    desc = "".join(skill.description_lines)
+    raw = f"{name}\0{skill.skill_type}\0{desc}"
+    normalized = _unicodedata.normalize("NFKC", raw).translate(_PUNCT_TABLE)
+    return _INVISIBLE_RE.sub("", normalized).casefold()
+
+
+def format_en_output(en_skills: list[ExtractedSkill]) -> str:
+    """ENスキルリストをシンプルなテキストフォーマットに変換（重複除去付き）
+
+    フォーマット（スキル間は空行区切り）:
+      スキル名
+      スキルタイプ
+      説明文（各効果1行）
+    """
+    seen: set[str] = set()
+    entries: list[str] = []
+    for skill in en_skills:
+        key = _dedup_key(skill)
+        if key in seen:
+            continue
+        seen.add(key)
+        lines = [skill.en_name or skill.jp_name, skill.skill_type]
+        lines.extend(skill.description_lines)
+        entries.append("\n".join(lines))
+    return "\n\n".join(entries) + "\n"
+
+
 def write_output(content: str, output_path: str) -> None:
     """出力ファイルに書き込み"""
     path = Path(output_path)

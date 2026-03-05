@@ -86,9 +86,7 @@ def run_local_ocr(
             text = _ocr_single_frame(group.representative, engine, crop_ratios, lang)
             if text:
                 group.ocr_hint = text
-                # プレビュー表示（最初の80文字）
-                preview = text.replace("\n", " ")[:80]
-                print(f"    → {preview}{'...' if len(text.replace(chr(10), ' ')) > 80 else ''}")
+                print(f"    → {text}")
             else:
                 print("    → テキスト検出なし")
         except Exception as e:

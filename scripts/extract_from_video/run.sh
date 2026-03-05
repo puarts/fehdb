@@ -3,14 +3,28 @@
 #
 # 使用例:
 #   bash scripts/extract_from_video/run.sh <id> <jp-url> <en-url>
-#   bash scripts/extract_from_video/run.sh 10-02-16 "https://www.youtube.com/watch?v=xxx" "https://www.youtube.com/watch?v=yyy"
+#   bash scripts/extract_from_video/run.sh --dry-run <id> <jp-url> <en-url>
 #
 # idがそのままoutputファイル名（<id>.txt）にも使われる
 
 set -euo pipefail
 
+DRY_RUN=""
+while getopts ":-:" opt; do
+  case $opt in
+    -)
+      case "$OPTARG" in
+        dry-run) DRY_RUN="--dry-run" ;;
+        *) echo "Unknown option: --$OPTARG" >&2; exit 1 ;;
+      esac
+      ;;
+    *) echo "Unknown option: -$OPTARG" >&2; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
 if [ $# -ne 3 ]; then
-  echo "Usage: $0 <id> <jp-url> <en-url>" >&2
+  echo "Usage: $0 [--dry-run] <id> <jp-url> <en-url>" >&2
   exit 1
 fi
 
@@ -28,4 +42,5 @@ uv run python "$SCRIPT_DIR/main.py" \
   --min-duration 1.5 \
   --ocr gemini \
   --keep-frames \
-  --local-ocr apple
+  --local-ocr apple \
+  $DRY_RUN

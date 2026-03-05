@@ -87,8 +87,26 @@ descriptionの改行ルール:
 [{"skill_name": "スキル名", "skill_type": "武器", ...}]
 ```"""
 
+EN_LINEBREAK_RULES = """\
+Do NOT split at visual word-wrap boundaries. One line = one independent effect or condition block.
+A single line may be 200+ characters long.
+
+Start a new array element when:
+- An "effective against" clause (e.g., "Effective against flying foes.")
+- A cooldown modifier (e.g., "Accelerates Special trigger (cooldown count-1).")
+- A turn-start effect ("At start of turn, ...")
+- A combat effect ("During combat, ...")
+- A conditional trigger ("If unit initiates combat, ..." / "If foe initiates combat, ...")
+- A post-combat effect ("After combat, ...")
+- A movement skill ("【Canto (...)】")
+
+Keep on the SAME line when:
+- A condition and its effect are joined by a comma
+- Parenthetical qualifiers like "(excluding area-of-effect Specials)"
+- Clauses joined by "and" or "also\""""
+
 EN_USER_PROMPT_NEW_ONLY = """\
-Extract ONLY new skills from this FEH skill screen.
+Extract skills from this FEH skill screen.
 
 How to identify skill text:
 - Skills are displayed inside bordered cards
@@ -97,17 +115,22 @@ How to identify skill text:
 - Hero introduction or character description text is NOT skill data
 - If this screen does not have this card structure, return an empty array []
 
-If this screen does not show a "Skills learnable" header (e.g., Harmonized Skill or Style screens), return an empty array [] — "!" marks only appear on skill list screens.
+There are two types of screens:
 
-In the skill list, each row is laid out as: "!" indicator (shown only for new skills) → skill type icon (circular badge) → skill name.
+**Type A — "Skills learnable" list screen:**
+This screen has a header like "Skills learnable" and shows multiple skills in a list.
+Each row is: "!" indicator (for new skills only) → skill type icon (circular badge) → skill name.
 The "!" is a small orange/yellow mark at the far left of the row.
 Circular icons (skill type badges) are NOT the "!" indicator.
-Skills without the "!" mark are not new — ignore them.
+→ Extract ONLY skills with the "!" mark. Ignore skills without "!".
 
-First check each skill for the "!" indicator, then extract only those with "!".
-If no skills have "!", return an empty array: []
+**Type B — Single-skill card screen (Style / Harmonized / Duo):**
+This screen shows a single skill in a large card format, without a "Skills learnable" header and without "!" marks.
+→ Extract the skill displayed on the card.
 
-For each skill with "!", extract:
+If the screen does not match either type, return an empty array [].
+
+For each extracted skill, provide:
 - skill_name: Skill name (string)
 - skill_type: One of "Weapon", "Special", "Assist", "Passive A", "Passive B", "Passive C", "Harmonized"
 - weapon_type: Weapon type (for weapons only)
@@ -117,7 +140,14 @@ For each skill with "!", extract:
 - description: Skill effect text (array of lines)
 - hero_name: Hero name shown on this screen
 
-Output as JSON array:
+Description line-break rules:
+""" + EN_LINEBREAK_RULES + """
+
+Important:
+- Transcribe text exactly as shown. Do not correct or paraphrase.
+- Use half-width numbers.
+
+Output as JSON array only (no other text):
 ```json
 [{"skill_name": "Heroic Maltet", "skill_type": "Weapon", ...}]
 ```"""
