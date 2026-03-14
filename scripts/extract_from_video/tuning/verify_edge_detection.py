@@ -1,9 +1,10 @@
 """水平エッジ検出の検証スクリプト
 
-全サンプルフレーム（JP 15枚 + EN 18枚）に対して
-色分析と水平エッジ検出を実行し、結果を比較する。
+全サンプルフレームに対して色分析と水平エッジ検出を実行し、結果を比較する。
+ラベルは data/{session}/annotations/frame_labels.json から読み込む。
 """
 
+import json
 from pathlib import Path
 
 from PIL import Image
@@ -20,46 +21,24 @@ ROW_GRADIENT_THRESHOLD = 15
 MIN_GAP_BETWEEN_EDGES = 5
 MIN_HORIZONTAL_LINES = 4
 
-# サンプルフレームの正解ラベル
-# True = スキル画面, False = 非スキル画面, None = 境界（双界/スタイル、new_onlyでは[]を返すべき）
-JP_LABELS: dict[str, bool | None] = {
-    "frame_00000.png": True,   # 習得可能スキルリスト
-    "frame_00001.png": True,   # 習得可能スキルリスト
-    "frame_00002.png": False,  # 英雄紹介（キャラ説明テキスト）
-    "frame_00003.png": None,   # 双界スキル説明
-    "frame_00004.png": True,   # 習得可能スキルリスト
-    "frame_00005.png": True,   # 習得可能スキルリスト
-    "frame_00006.png": True,   # 習得可能スキルリスト
-    "frame_00007.png": True,   # 習得可能スキルリスト
-    "frame_00008.png": True,   # 習得可能スキルリスト
-    "frame_00009.png": None,   # スタイルスキル説明
-    "frame_00010.png": False,  # 英雄紹介（スプライト＋テキスト）
-    "frame_00011.png": False,  # 英雄能力説明（キャラ絵＋テキスト）
-    "frame_00012.png": False,  # ストーリー
-    "frame_00013.png": False,  # バナー
-    "frame_00014.png": False,  # 召喚
+# ラベル文字列 → Python値の変換
+LABEL_MAP: dict[str, bool | None] = {
+    "skill_screen": True,
+    "non_skill_screen": False,
+    "ambiguous": None,
 }
 
-EN_LABELS: dict[str, bool | None] = {
-    "frame_00000.png": True,   # Skills Learnable list
-    "frame_00001.png": True,
-    "frame_00002.png": True,
-    "frame_00003.png": True,
-    "frame_00004.png": True,
-    "frame_00005.png": True,
-    "frame_00006.png": True,
-    "frame_00007.png": True,
-    "frame_00008.png": True,
-    "frame_00009.png": True,
-    "frame_00010.png": True,
-    "frame_00011.png": True,
-    "frame_00012.png": True,
-    "frame_00013.png": None,   # Style skill description
-    "frame_00014.png": False,  # Hero introduction
-    "frame_00015.png": False,  # Hero ability description
-    "frame_00016.png": False,  # Story
-    "frame_00017.png": False,  # Banner
-}
+
+def load_labels_from_json(
+    labels_path: Path,
+) -> tuple[dict[str, bool | None], dict[str, bool | None]]:
+    """frame_labels.json からJP/ENラベルを読み込む"""
+    with open(labels_path) as f:
+        data = json.load(f)
+    annotations = data["annotations"]
+    jp = {name: LABEL_MAP[label] for name, label in annotations.get("jp", {}).items()}
+    en = {name: LABEL_MAP[label] for name, label in annotations.get("en", {}).items()}
+    return jp, en
 
 
 def analyze_color(panel: Image.Image) -> tuple[float, float]:
@@ -340,26 +319,31 @@ def combined_sweep(
 
 
 def main() -> None:
-    base = Path(__file__).parent / ".work" / "frames"
-    jp_dir = base / "jp"
-    en_dir = base / "en"
+    data_dir = Path(__file__).parent.parent / "data" / "10-03-06"
+    labels_path = data_dir / "annotations" / "frame_labels.json"
+    jp_dir = data_dir / "images" / "jp"
+    en_dir = data_dir / "images" / "en"
 
+    if not labels_path.exists():
+        print(f"ラベルファイルが見つかりません: {labels_path}")
+        return
     if not jp_dir.exists() and not en_dir.exists():
-        print("サンプルフレームが見つかりません: .work/frames/jp/ または .work/frames/en/")
-        print("先に main.py --frames-only --keep-frames で抽出してください")
+        print(f"フレーム画像が見つかりません: {data_dir / 'images'}")
         return
 
+    jp_labels, en_labels = load_labels_from_json(labels_path)
+
     if jp_dir.exists():
-        evaluate_frames(jp_dir, JP_LABELS, "JP")
+        evaluate_frames(jp_dir, jp_labels, "JP")
     if en_dir.exists():
-        evaluate_frames(en_dir, EN_LABELS, "EN")
+        evaluate_frames(en_dir, en_labels, "EN")
 
     # 合算スイープ
     datasets = []
     if jp_dir.exists():
-        datasets.append((jp_dir, JP_LABELS, "JP"))
+        datasets.append((jp_dir, jp_labels, "JP"))
     if en_dir.exists():
-        datasets.append((en_dir, EN_LABELS, "EN"))
+        datasets.append((en_dir, en_labels, "EN"))
     if datasets:
         combined_sweep(datasets)
 
