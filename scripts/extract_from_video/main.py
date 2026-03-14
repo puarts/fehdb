@@ -82,6 +82,8 @@ def main():
                         choices=["auto", "apple", "tesseract", "none"],
                         default="none",
                         help="ローカルOCRでVLMにヒント提供（デフォルト: none）")
+    parser.add_argument("--no-card-crop", action="store_true",
+                        help="カードクロップを無効化（従来の全画面OCRを使用）")
 
     args = parser.parse_args()
 
@@ -168,12 +170,30 @@ def _run_pipeline(args, work_dir: Path):
     if en_frame_groups:
         print(f"EN スキル数: {len(en_frame_groups)}")
 
+    # === Step 3.5: スキルカードクロップ ===
+    if not args.no_card_crop:
+        from card_crop import crop_frame_groups
+
+        print()
+        print("=" * 50)
+        print("Step 3.5: スキルカードクロップ")
+        print("=" * 50)
+
+        print("\n[日本語版]")
+        jp_cropped_dir = work_dir / "frames" / "cropped_jp"
+        crop_frame_groups(jp_frame_groups, jp_cropped_dir)
+
+        if en_frame_groups:
+            print("\n[英語版]")
+            en_cropped_dir = work_dir / "frames" / "cropped_en"
+            crop_frame_groups(en_frame_groups, en_cropped_dir)
+
     if args.frames_only:
         print("\n--frames-only: フレーム抽出完了。OCRはスキップします。")
         print(f"フレーム保存先: {work_dir / 'frames'}")
         return
 
-    # === Step 3.5: ローカルOCRヒント ===
+    # === Step 3.7: ローカルOCRヒント ===
     if args.local_ocr != "none":
         from local_ocr import detect_local_ocr_engine, run_local_ocr
         engine = detect_local_ocr_engine(args.local_ocr)

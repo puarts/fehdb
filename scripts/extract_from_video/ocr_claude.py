@@ -4,11 +4,12 @@ import time
 
 import anthropic
 
-from models import ExtractedSkill, FrameGroup
+from models import ExtractedSkill, FrameGroup, SkillCard
 from ocr import (
     extract_json, print_json, parse_jp_response, parse_en_response,
     load_images, build_match_prompt, augment_prompt_with_ocr_hint,
     JP_USER_PROMPT_NEW_ONLY, EN_USER_PROMPT_NEW_ONLY,
+    JP_USER_PROMPT_SINGLE_CARD, EN_USER_PROMPT_SINGLE_CARD,
     JP_LINEBREAK_RULES, JP_LINEBREAK_EXAMPLES,
 )
 
@@ -90,10 +91,27 @@ class ClaudeOCRBackend:
         results = []
         for i, group in enumerate(frame_groups):
             print(f"  JP OCR [{i + 1}/{len(frame_groups)}]: {Path(group.representative).name}")
-            images = load_images(group.all_frames)
 
             try:
-                if new_only:
+                if group.skill_cards:
+                    # カードクロップあり: 個別カードをOCR
+                    print(f"    カードクロップ: {len(group.skill_cards)}枚")
+                    for card in group.skill_cards:
+                        card_images = load_images([card.image_path])
+                        skill_data = self._call_vision_api_jp_single_card(card_images, ocr_hint=group.ocr_hint)
+                        skill = parse_jp_response(skill_data, group.frame_index)
+                        if not skill.jp_name:
+                            print(f"    → カード{card.card_index}: 非スキル（スキップ）")
+                            continue
+                        is_new = skill_data.get("is_new", True)
+                        if new_only and not is_new:
+                            print(f"    → カード{card.card_index}: {skill.jp_name}（既存スキル、スキップ）")
+                            continue
+                        results.append(skill)
+                        print(f"    → カード{card.card_index}: {skill.jp_name}")
+                elif new_only:
+                    # カードクロップなし（単体画面等）: 従来の全画面OCR
+                    images = load_images(group.all_frames)
                     skills_data = self._call_vision_api_jp_new_only(images, ocr_hint=group.ocr_hint)
                     if not skills_data:
                         print("    → 新スキルなし（スキップ）")
@@ -106,6 +124,7 @@ class ClaudeOCRBackend:
                         results.append(skill)
                         print(f"    → {skill.jp_name}")
                 else:
+                    images = load_images(group.all_frames)
                     skill_data = self._call_vision_api_jp(images, ocr_hint=group.ocr_hint)
                     skill = parse_jp_response(skill_data, group.frame_index)
                     if not skill.jp_name:
@@ -129,10 +148,26 @@ class ClaudeOCRBackend:
         results = []
         for i, group in enumerate(frame_groups):
             print(f"  EN OCR [{i + 1}/{len(frame_groups)}]: {Path(group.representative).name}")
-            images = load_images(group.all_frames)
 
             try:
-                if new_only:
+                if group.skill_cards:
+                    # カードクロップあり: 個別カードをOCR
+                    print(f"    カードクロップ: {len(group.skill_cards)}枚")
+                    for card in group.skill_cards:
+                        card_images = load_images([card.image_path])
+                        skill_data = self._call_vision_api_en_single_card(card_images)
+                        skill = parse_en_response(skill_data, group.frame_index)
+                        if not skill.en_name:
+                            print(f"    → カード{card.card_index}: 非スキル（スキップ）")
+                            continue
+                        is_new = skill_data.get("is_new", True)
+                        if new_only and not is_new:
+                            print(f"    → カード{card.card_index}: {skill.en_name}（既存スキル、スキップ）")
+                            continue
+                        results.append(skill)
+                        print(f"    → カード{card.card_index}: {skill.en_name}")
+                elif new_only:
+                    images = load_images(group.all_frames)
                     skills_data = self._call_vision_api_en_new_only(images)
                     for skill_data in skills_data:
                         skill = parse_en_response(skill_data, group.frame_index)
@@ -177,6 +212,67 @@ class ClaudeOCRBackend:
                     return {}
 
         return {}
+
+    def _call_vision_api_jp_single_card(self, images: list[dict], ocr_hint: str | None = None) -> dict:
+        """JPカードクロップ画像をClaude Vision APIに送信し、単一スキルJSONを返す"""
+        prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT_SINGLE_CARD, ocr_hint)
+        content = images + [{"type": "text", "text": prompt}]
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = self.client.messages.create(
+                    model=self.model,
+                    max_tokens=2048,
+                    system=JP_SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": content}],
+                )
+                text = response.content[0].text
+                data = extract_json(text)
+                print_json(data)
+                return data
+            except _RETRYABLE_ERRORS:
+                wait = 2 ** attempt
+                print(f"    サーバーエラー/レート制限、{wait}秒待機...")
+                time.sleep(wait)
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    wait = 2 ** attempt
+                    print(f"    リトライ ({attempt + 1}/{MAX_RETRIES}): {e}")
+                    time.sleep(wait)
+                else:
+                    raise
+
+        raise RuntimeError("JP OCR (single_card): 最大リトライ回数超過")
+
+    def _call_vision_api_en_single_card(self, images: list[dict]) -> dict:
+        """ENカードクロップ画像をClaude Vision APIに送信し、単一スキルJSONを返す"""
+        content = images + [{"type": "text", "text": EN_USER_PROMPT_SINGLE_CARD}]
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = self.client.messages.create(
+                    model=self.model,
+                    max_tokens=2048,
+                    system=EN_SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": content}],
+                )
+                text = response.content[0].text
+                data = extract_json(text)
+                print_json(data)
+                return data
+            except _RETRYABLE_ERRORS:
+                wait = 2 ** attempt
+                print(f"    サーバーエラー/レート制限、{wait}秒待機...")
+                time.sleep(wait)
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    wait = 2 ** attempt
+                    print(f"    リトライ ({attempt + 1}/{MAX_RETRIES}): {e}")
+                    time.sleep(wait)
+                else:
+                    raise
+
+        raise RuntimeError("EN OCR (single_card): 最大リトライ回数超過")
 
     def _call_vision_api_jp_new_only(self, images: list[dict], ocr_hint: str | None = None) -> list[dict]:
         """JP画像をClaude Vision APIに送信し、新スキルのみJSON配列で返す"""

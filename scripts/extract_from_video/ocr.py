@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Protocol, runtime_checkable
 
 from line_merger import merge_lines
-from models import ExtractedSkill, FrameGroup
+from models import ExtractedSkill, FrameGroup, SkillCard
 
 
 # === 改行ルール（両バックエンドで共有） ===
@@ -104,6 +104,65 @@ Keep on the SAME line when:
 - A condition and its effect are joined by a comma
 - Parenthetical qualifiers like "(excluding area-of-effect Specials)"
 - Clauses joined by "and" or "also\""""
+
+JP_USER_PROMPT_SINGLE_CARD = """\
+このFEHのスキルカード画像から以下の情報を正確にJSON形式で抽出してください。
+
+この画像は1つのスキルカードのクロップです。
+
+抽出フィールド:
+- skill_name: スキル名（文字列）
+- skill_type: スキル種別。次のいずれか: "武器", "奥義", "サポート", "パッシブA", "パッシブB", "パッシブC", "響心"
+- weapon_type: 武器種（武器の場合のみ。例: "剣", "槍", "斧", "弓", "暗器", "杖", "竜石", "獣", "赤魔法", "青魔法", "緑魔法", "無魔法"）
+- might: 威力（武器の場合のみ、整数）
+- range: 射程（整数。武器の場合のみ）
+- special_count: 奥義カウント（奥義の場合のみ、整数）
+- description: 説明文（行ごとの配列）
+- hero_name: 英雄名（表示されていればnull以外）
+- is_new: このスキルが新スキルかどうか（「！」マークが左端にある場合true）
+
+descriptionの改行ルール:
+""" + JP_LINEBREAK_RULES + """
+
+""" + JP_LINEBREAK_EXAMPLES + """
+
+注意事項:
+- テキストは一字一句正確に写してください。意味の推測による修正はしないでください
+- 数値は半角で記述してください
+
+出力形式（JSONのみ、他のテキストは不要）:
+```json
+{"skill_name": "スキル名", "skill_type": "武器", "is_new": true, ...}
+```"""
+
+EN_USER_PROMPT_SINGLE_CARD = """\
+Extract skill information from this FEH skill card image.
+
+This image is a crop of a single skill card.
+
+Extract the following fields:
+- skill_name: Skill name (string)
+- skill_type: One of "Weapon", "Special", "Assist", "Passive A", "Passive B", "Passive C", "Harmonized"
+- weapon_type: Weapon type (for weapons only)
+- might: Might (for weapons only, integer)
+- range: Range (for weapons only, integer)
+- special_count: Special cooldown (for specials only, integer)
+- description: Skill effect text (array of lines)
+- hero_name: Hero name (if shown, otherwise null)
+- is_new: Whether this is a new skill (true if "!" mark is at the left edge)
+
+Description line-break rules:
+""" + EN_LINEBREAK_RULES + """
+
+Important:
+- Transcribe text exactly as shown. Do not correct or paraphrase.
+- Use half-width numbers.
+
+Output as JSON only (no other text):
+```json
+{"skill_name": "Heroic Maltet", "skill_type": "Weapon", "is_new": true, ...}
+```"""
+
 
 EN_USER_PROMPT_NEW_ONLY = """\
 Extract skills from this FEH skill screen.
