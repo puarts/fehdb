@@ -1,6 +1,5 @@
 import re
 import subprocess
-import sys
 from pathlib import Path
 
 import imagehash
@@ -335,3 +334,68 @@ def _collect_scroll_frames(group: list[dict]) -> list[str]:
         return [_select_sharpest([d]) for d in unique_descs]
     else:
         return [_select_sharpest(group)]
+
+
+def extract_hero_intro_candidates(
+    video_path: str,
+    strict_timestamps: list[float],
+    output_dir: str,
+    noise: float = 0.08,
+    min_duration: float = 1.5,
+    tolerance: float = 2.0,
+) -> list[tuple[str, float]]:
+    """差分法で英雄紹介候補フレームを抽出
+
+    strict（noise=0.003）で検出されるスキルフレームのタイムスタンプを除外することで、
+    loose（noise=0.08）でのみ検出される英雄紹介フレーム候補を抽出する。
+
+    Args:
+        video_path: 動画ファイルのパス
+        strict_timestamps: noise=0.003で検出されたタイムスタンプ（除外対象）
+        output_dir: フレーム出力ディレクトリ
+        noise: loose検出のノイズ許容値
+        min_duration: 最低静止秒数
+        tolerance: タイムスタンプ照合の許容誤差（秒）
+
+    Returns:
+        [(frame_path, timestamp), ...] のリスト（差分候補のみ）
+    """
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+
+    # loose パラメータで freezedetect 実行
+    print(f"英雄紹介候補検出中（noise={noise}, d={min_duration}）")
+    cmd = [
+        "ffmpeg", "-i", video_path,
+        "-vf", f"freezedetect=n={noise}:d={min_duration}",
+        "-f", "null", "-",
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    loose_intervals = _parse_freezedetect(result.stderr)
+    loose_timestamps = [(s + e) / 2 for s, e in loose_intervals]
+
+    print(f"  loose検出: {len(loose_timestamps)} 区間")
+    print(f"  strict検出: {len(strict_timestamps)} 区間")
+
+    # 差分: strict にマッチしないタイムスタンプを候補とする
+    def _is_near_strict(ts: float) -> bool:
+        return any(abs(ts - s) <= tolerance for s in strict_timestamps)
+
+    candidates = [(ts, i) for i, ts in enumerate(loose_timestamps) if not _is_near_strict(ts)]
+    print(f"  差分候補: {len(candidates)} フレーム")
+
+    # 候補フレームを抽出
+    frames = []
+    for ts, idx in candidates:
+        output_path = out / f"hero_candidate_{idx:05d}.png"
+        cmd = [
+            "ffmpeg", "-ss", str(ts), "-i", video_path,
+            "-frames:v", "1", "-q:v", "2",
+            str(output_path), "-y",
+        ]
+        subprocess.run(cmd, capture_output=True, text=True)
+        if output_path.exists():
+            frames.append((str(output_path), ts))
+
+    print(f"  抽出フレーム数: {len(frames)}")
+    return frames

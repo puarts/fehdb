@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 from download import download_video, load_local_video
-from frames import extract_static_frames, detect_skill_frames, deduplicate_frames
+from frames import extract_static_frames, extract_hero_intro_candidates, detect_skill_frames, deduplicate_frames
 from ocr import create_backend
 from formatter import format_output, format_en_output, write_output, get_max_skill_id
 from models import VideoInfo
@@ -84,6 +84,8 @@ def main():
                         help="ローカルOCRでVLMにヒント提供（デフォルト: none）")
     parser.add_argument("--no-card-crop", action="store_true",
                         help="カードクロップを無効化（従来の全画面OCRを使用）")
+    parser.add_argument("--detect-weapon", action="store_true",
+                        help="英雄紹介フレームから武器種を自動検出")
 
     args = parser.parse_args()
 
@@ -152,6 +154,47 @@ def _run_pipeline(args, work_dir: Path):
         en_static_frames = extract_static_frames(
             en_video.path, en_frames_dir, min_duration=args.min_duration,
         )
+
+    # === Step 2.5: 英雄紹介フレーム検出（武器種取得） ===
+    hero_weapon_types: dict[float, str] = {}  # timestamp → weapon_type
+    if args.detect_weapon:
+        from weapon_type import detect_weapon_types_batch, get_weapon_code
+
+        print()
+        print("=" * 50)
+        print("Step 2.5: 英雄紹介フレーム検出（武器種取得）")
+        print("=" * 50)
+
+        # strict検出のタイムスタンプを取得（Step 2のフレームから逆算）
+        # フレームファイル名から元のインデックスを取得し、タイムスタンプを再計算
+        # ※ extract_static_framesはタイムスタンプを返さないため、
+        #    ここでは差分法のためにloose検出を別途実行する
+        strict_timestamps = _extract_timestamps(jp_video.path, min_duration=args.min_duration)
+
+        hero_candidates_dir = str(work_dir / "frames" / "hero_candidates")
+        hero_candidates = extract_hero_intro_candidates(
+            jp_video.path,
+            strict_timestamps=strict_timestamps,
+            output_dir=hero_candidates_dir,
+            noise=0.08,
+            min_duration=1.5,
+        )
+
+        if hero_candidates:
+            candidate_paths = [path for path, _ in hero_candidates]
+            results = detect_weapon_types_batch(candidate_paths)
+
+            detected_count = 0
+            for (frame_path, weapon_type, score), (_, ts) in zip(results, hero_candidates):
+                if weapon_type:
+                    hero_weapon_types[ts] = weapon_type
+                    code = get_weapon_code(weapon_type)
+                    detected_count += 1
+                    print(f"  {Path(frame_path).name}: {weapon_type} (code={code}, score={score:.3f})")
+
+            print(f"\n英雄紹介フレーム: {detected_count}/{len(hero_candidates)} 検出")
+        else:
+            print("  差分候補フレームなし")
 
     # === Step 3: スキル画面検出 + 重複除去 ===
     print()
@@ -298,6 +341,25 @@ def _get_video(url: str | None, local_path: str | None, language: str, *, video_
     if url:
         return download_video(url, language, video_dir=video_dir)
     raise ValueError(f"{language}動画のソースが指定されていません")
+
+
+def _extract_timestamps(
+    video_path: str,
+    min_duration: float = 1.5,
+    noise: float = 0.003,
+) -> list[float]:
+    """動画からfreezedetectでタイムスタンプを取得（フレーム抽出なし）"""
+    import subprocess
+    from frames import _parse_freezedetect
+
+    cmd = [
+        "ffmpeg", "-i", video_path,
+        "-vf", f"freezedetect=n={noise}:d={min_duration}",
+        "-f", "null", "-",
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    intervals = _parse_freezedetect(result.stderr)
+    return [(s + e) / 2 for s, e in intervals]
 
 
 def _generate_output_name() -> str:
