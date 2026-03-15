@@ -1,0 +1,416 @@
+{
+  "task": "hero_intro_detection",
+  "source_video": ".work/09-05-07/videos/jp_video.mp4",
+  "description": "新英雄＆魔器ドゥドゥー (2025-05-07)",
+  "labels": [
+    "hero_intro",
+    "skill_screen",
+    "other"
+  ],
+  "frames": {
+    "frame_00000.png": {
+      "label": "other",
+      "timestamp": 4.805
+    },
+    "frame_00001.png": {
+      "label": "other",
+      "timestamp": 6.29
+    },
+    "frame_00002.png": {
+      "label": "other",
+      "timestamp": 8.992
+    },
+    "frame_00003.png": {
+      "label": "other",
+      "timestamp": 11.678
+    },
+    "frame_00004.png": {
+      "label": "other",
+      "timestamp": 14.181
+    },
+    "frame_00005.png": {
+      "label": "other",
+      "timestamp": 15.382
+    },
+    "frame_00006.png": {
+      "label": "other",
+      "timestamp": 17.084
+    },
+    "frame_00007.png": {
+      "label": "hero_intro",
+      "timestamp": 20.003,
+      "hero_name": "リュール♀"
+    },
+    "frame_00008.png": {
+      "label": "other",
+      "timestamp": 22.467
+    },
+    "frame_00009.png": {
+      "label": "other",
+      "timestamp": 24.758
+    },
+    "frame_00010.png": {
+      "label": "other",
+      "timestamp": 27.644
+    },
+    "frame_00011.png": {
+      "label": "other",
+      "timestamp": 33.884
+    },
+    "frame_00012.png": {
+      "label": "other",
+      "timestamp": 38.755
+    },
+    "frame_00013.png": {
+      "label": "other",
+      "timestamp": 42.334
+    },
+    "frame_00014.png": {
+      "label": "other",
+      "timestamp": 45.212
+    },
+    "frame_00015.png": {
+      "label": "other",
+      "timestamp": 47.347
+    },
+    "frame_00016.png": {
+      "label": "other",
+      "timestamp": 48.916
+    },
+    "frame_00017.png": {
+      "label": "other",
+      "timestamp": 51.018
+    },
+    "frame_00018.png": {
+      "label": "other",
+      "timestamp": 52.703
+    },
+    "frame_00019.png": {
+      "label": "other",
+      "timestamp": 54.288
+    },
+    "frame_00020.png": {
+      "label": "other",
+      "timestamp": 55.472
+    },
+    "frame_00021.png": {
+      "label": "other",
+      "timestamp": 57.057
+    },
+    "frame_00022.png": {
+      "label": "other",
+      "timestamp": 58.075
+    },
+    "frame_00023.png": {
+      "label": "other",
+      "timestamp": 60.661
+    },
+    "frame_00024.png": {
+      "label": "other",
+      "timestamp": 61.845
+    },
+    "frame_00025.png": {
+      "label": "other",
+      "timestamp": 63.13
+    },
+    "frame_00026.png": {
+      "label": "hero_intro",
+      "timestamp": 66.416,
+      "hero_name": "リュール♂"
+    },
+    "frame_00027.png": {
+      "label": "other",
+      "timestamp": 68.694
+    },
+    "frame_00028.png": {
+      "label": "other",
+      "timestamp": 70.737
+    },
+    "frame_00029.png": {
+      "label": "other",
+      "timestamp": 72.94
+    },
+    "frame_00030.png": {
+      "label": "other",
+      "timestamp": 75.843
+    },
+    "frame_00031.png": {
+      "label": "other",
+      "timestamp": 82.149
+    },
+    "frame_00032.png": {
+      "label": "other",
+      "timestamp": 87.187
+    },
+    "frame_00033.png": {
+      "label": "other",
+      "timestamp": 91.191
+    },
+    "frame_00034.png": {
+      "label": "other",
+      "timestamp": 93.81
+    },
+    "frame_00035.png": {
+      "label": "other",
+      "timestamp": 94.845
+    },
+    "frame_00036.png": {
+      "label": "other",
+      "timestamp": 96.68
+    },
+    "frame_00037.png": {
+      "label": "other",
+      "timestamp": 98.699
+    },
+    "frame_00038.png": {
+      "label": "other",
+      "timestamp": 100.751
+    },
+    "frame_00039.png": {
+      "label": "other",
+      "timestamp": 102.486
+    },
+    "frame_00040.png": {
+      "label": "other",
+      "timestamp": 103.554
+    },
+    "frame_00041.png": {
+      "label": "other",
+      "timestamp": 105.038
+    },
+    "frame_00042.png": {
+      "label": "other",
+      "timestamp": 107.85
+    },
+    "frame_00043.png": {
+      "label": "other",
+      "timestamp": 109.042
+    },
+    "frame_00044.png": {
+      "label": "other",
+      "timestamp": 110.677
+    },
+    "frame_00045.png": {
+      "label": "other",
+      "timestamp": 111.929
+    },
+    "frame_00046.png": {
+      "label": "other",
+      "timestamp": 113.614
+    },
+    "frame_00047.png": {
+      "label": "hero_intro",
+      "timestamp": 116.884,
+      "hero_name": "レナ"
+    },
+    "frame_00048.png": {
+      "label": "other",
+      "timestamp": 119.011
+    },
+    "frame_00049.png": {
+      "label": "other",
+      "timestamp": 120.204
+    },
+    "frame_00050.png": {
+      "label": "other",
+      "timestamp": 122.039
+    },
+    "frame_00051.png": {
+      "label": "other",
+      "timestamp": 125.008
+    },
+    "frame_00052.png": {
+      "label": "other",
+      "timestamp": 131.164
+    },
+    "frame_00053.png": {
+      "label": "other",
+      "timestamp": 136.036
+    },
+    "frame_00054.png": {
+      "label": "other",
+      "timestamp": 139.79
+    },
+    "frame_00055.png": {
+      "label": "other",
+      "timestamp": 141.008
+    },
+    "frame_00056.png": {
+      "label": "other",
+      "timestamp": 143.894
+    },
+    "frame_00057.png": {
+      "label": "other",
+      "timestamp": 146.013
+    },
+    "frame_00058.png": {
+      "label": "other",
+      "timestamp": 147.581
+    },
+    "frame_00059.png": {
+      "label": "other",
+      "timestamp": 148.949
+    },
+    "frame_00060.png": {
+      "label": "other",
+      "timestamp": 151.418
+    },
+    "frame_00061.png": {
+      "label": "other",
+      "timestamp": 152.452
+    },
+    "frame_00062.png": {
+      "label": "other",
+      "timestamp": 153.52
+    },
+    "frame_00063.png": {
+      "label": "other",
+      "timestamp": 155.556
+    },
+    "frame_00064.png": {
+      "label": "other",
+      "timestamp": 157.641
+    },
+    "frame_00065.png": {
+      "label": "other",
+      "timestamp": 159.317
+    },
+    "frame_00066.png": {
+      "label": "other",
+      "timestamp": 160.661
+    },
+    "frame_00067.png": {
+      "label": "other",
+      "timestamp": 161.678
+    },
+    "frame_00068.png": {
+      "label": "other",
+      "timestamp": 163.347
+    },
+    "frame_00069.png": {
+      "label": "other",
+      "timestamp": 166.283
+    },
+    "frame_00070.png": {
+      "label": "other",
+      "timestamp": 167.684
+    },
+    "frame_00071.png": {
+      "label": "other",
+      "timestamp": 171.121
+    },
+    "frame_00072.png": {
+      "label": "other",
+      "timestamp": 173.941
+    },
+    "frame_00073.png": {
+      "label": "other",
+      "timestamp": 176.569
+    },
+    "frame_00074.png": {
+      "label": "other",
+      "timestamp": 178.912
+    },
+    "frame_00075.png": {
+      "label": "other",
+      "timestamp": 180.113
+    },
+    "frame_00076.png": {
+      "label": "other",
+      "timestamp": 181.515
+    },
+    "frame_00077.png": {
+      "label": "hero_intro",
+      "timestamp": 184.768,
+      "hero_name": "ドゥドゥー"
+    },
+    "frame_00078.png": {
+      "label": "other",
+      "timestamp": 187.062
+    },
+    "frame_00079.png": {
+      "label": "other",
+      "timestamp": 188.972
+    },
+    "frame_00080.png": {
+      "label": "other",
+      "timestamp": 191.892
+    },
+    "frame_00081.png": {
+      "label": "other",
+      "timestamp": 197.981
+    },
+    "frame_00082.png": {
+      "label": "other",
+      "timestamp": 202.903
+    },
+    "frame_00083.png": {
+      "label": "other",
+      "timestamp": 205.981
+    },
+    "frame_00084.png": {
+      "label": "other",
+      "timestamp": 208.192
+    },
+    "frame_00085.png": {
+      "label": "other",
+      "timestamp": 209.276
+    },
+    "frame_00086.png": {
+      "label": "other",
+      "timestamp": 212.563
+    },
+    "frame_00087.png": {
+      "label": "other",
+      "timestamp": 215.916
+    },
+    "frame_00088.png": {
+      "label": "other",
+      "timestamp": 218.602
+    },
+    "frame_00089.png": {
+      "label": "other",
+      "timestamp": 220.504
+    },
+    "frame_00090.png": {
+      "label": "other",
+      "timestamp": 222.022
+    },
+    "frame_00091.png": {
+      "label": "other",
+      "timestamp": 225.342
+    },
+    "frame_00092.png": {
+      "label": "other",
+      "timestamp": 226.927
+    },
+    "frame_00093.png": {
+      "label": "other",
+      "timestamp": 228.795
+    },
+    "frame_00094.png": {
+      "label": "other",
+      "timestamp": 230.964
+    },
+    "frame_00095.png": {
+      "label": "other",
+      "timestamp": 233.3
+    },
+    "frame_00096.png": {
+      "label": "other",
+      "timestamp": 234.568
+    },
+    "frame_00097.png": {
+      "label": "other",
+      "timestamp": 238.622
+    },
+    "frame_00098.png": {
+      "label": "other",
+      "timestamp": 246.513
+    },
+    "frame_00099.png": {
+      "label": "other",
+      "timestamp": 249.283
+    }
+  }
+}

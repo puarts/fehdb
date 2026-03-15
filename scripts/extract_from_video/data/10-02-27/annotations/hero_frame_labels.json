@@ -1,0 +1,237 @@
+{
+  "task": "hero_intro_detection",
+  "source_video": ".work/10-02-27/videos/jp_video.mp4",
+  "description": "神階英雄チキ (2026-02-27)",
+  "labels": [
+    "hero_intro",
+    "skill_screen",
+    "other"
+  ],
+  "frames": {
+    "frame_00000.png": {
+      "label": "other",
+      "timestamp": 0.792
+    },
+    "frame_00001.png": {
+      "label": "other",
+      "timestamp": 3.32
+    },
+    "frame_00002.png": {
+      "label": "other",
+      "timestamp": 4.872
+    },
+    "frame_00003.png": {
+      "label": "other",
+      "timestamp": 7.741
+    },
+    "frame_00004.png": {
+      "label": "other",
+      "timestamp": 8.842
+    },
+    "frame_00005.png": {
+      "label": "other",
+      "timestamp": 11.395
+    },
+    "frame_00006.png": {
+      "label": "other",
+      "timestamp": 13.08
+    },
+    "frame_00007.png": {
+      "label": "other",
+      "timestamp": 14.414
+    },
+    "frame_00008.png": {
+      "label": "other",
+      "timestamp": 15.582
+    },
+    "frame_00009.png": {
+      "label": "other",
+      "timestamp": 16.783
+    },
+    "frame_00010.png": {
+      "label": "other",
+      "timestamp": 18.202
+    },
+    "frame_00011.png": {
+      "label": "hero_intro",
+      "timestamp": 20.904,
+      "hero_name": "チキ"
+    },
+    "frame_00012.png": {
+      "label": "other",
+      "timestamp": 23.412
+    },
+    "frame_00013.png": {
+      "label": "other",
+      "timestamp": 25.409
+    },
+    "frame_00014.png": {
+      "label": "other",
+      "timestamp": 26.81
+    },
+    "frame_00015.png": {
+      "label": "other",
+      "timestamp": 28.512
+    },
+    "frame_00016.png": {
+      "label": "other",
+      "timestamp": 31.081
+    },
+    "frame_00017.png": {
+      "label": "other",
+      "timestamp": 37.371
+    },
+    "frame_00018.png": {
+      "label": "other",
+      "timestamp": 42.276
+    },
+    "frame_00019.png": {
+      "label": "other",
+      "timestamp": 45.579
+    },
+    "frame_00020.png": {
+      "label": "other",
+      "timestamp": 47.147
+    },
+    "frame_00021.png": {
+      "label": "other",
+      "timestamp": 48.599
+    },
+    "frame_00022.png": {
+      "label": "other",
+      "timestamp": 50.617
+    },
+    "frame_00023.png": {
+      "label": "other",
+      "timestamp": 53.087
+    },
+    "frame_00024.png": {
+      "label": "other",
+      "timestamp": 55.856
+    },
+    "frame_00025.png": {
+      "label": "other",
+      "timestamp": 57.024
+    },
+    "frame_00026.png": {
+      "label": "other",
+      "timestamp": 58.108
+    },
+    "frame_00027.png": {
+      "label": "other",
+      "timestamp": 59.81
+    },
+    "frame_00028.png": {
+      "label": "other",
+      "timestamp": 61.311
+    },
+    "frame_00029.png": {
+      "label": "other",
+      "timestamp": 63.013
+    },
+    "frame_00030.png": {
+      "label": "other",
+      "timestamp": 64.915
+    },
+    "frame_00031.png": {
+      "label": "other",
+      "timestamp": 66.917
+    },
+    "frame_00032.png": {
+      "label": "other",
+      "timestamp": 68.743
+    },
+    "frame_00033.png": {
+      "label": "other",
+      "timestamp": 70.645
+    },
+    "frame_00034.png": {
+      "label": "other",
+      "timestamp": 72.706
+    },
+    "frame_00035.png": {
+      "label": "other",
+      "timestamp": 74.041
+    },
+    "frame_00036.png": {
+      "label": "other",
+      "timestamp": 76.321
+    },
+    "frame_00037.png": {
+      "label": "other",
+      "timestamp": 78.729
+    },
+    "frame_00038.png": {
+      "label": "other",
+      "timestamp": 81.256
+    },
+    "frame_00039.png": {
+      "label": "other",
+      "timestamp": 82.85
+    },
+    "frame_00040.png": {
+      "label": "other",
+      "timestamp": 84.468
+    },
+    "frame_00041.png": {
+      "label": "other",
+      "timestamp": 86.57
+    },
+    "frame_00042.png": {
+      "label": "other",
+      "timestamp": 88.972
+    },
+    "frame_00043.png": {
+      "label": "other",
+      "timestamp": 90.808
+    },
+    "frame_00044.png": {
+      "label": "other",
+      "timestamp": 92.142
+    },
+    "frame_00045.png": {
+      "label": "other",
+      "timestamp": 93.16
+    },
+    "frame_00046.png": {
+      "label": "other",
+      "timestamp": 94.311
+    },
+    "frame_00047.png": {
+      "label": "other",
+      "timestamp": 95.395
+    },
+    "frame_00048.png": {
+      "label": "other",
+      "timestamp": 97.281
+    },
+    "frame_00049.png": {
+      "label": "other",
+      "timestamp": 98.882
+    },
+    "frame_00050.png": {
+      "label": "other",
+      "timestamp": 103.504
+    },
+    "frame_00051.png": {
+      "label": "other",
+      "timestamp": 107.391
+    },
+    "frame_00052.png": {
+      "label": "other",
+      "timestamp": 109.51
+    },
+    "frame_00053.png": {
+      "label": "other",
+      "timestamp": 112.479
+    },
+    "frame_00054.png": {
+      "label": "other",
+      "timestamp": 119.603
+    },
+    "frame_00055.png": {
+      "label": "other",
+      "timestamp": 122.589
+    }
+  }
+}
