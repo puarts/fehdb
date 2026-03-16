@@ -35,6 +35,7 @@ class FrameGroup:
     all_frames: list[str] = field(default_factory=list)  # スクロール含む全フレーム
     frame_index: int = 0
     ocr_hint: str | None = None  # ローカルOCRヒントテキスト
+    weapon_hint: str | None = None  # 英雄紹介フレームから推定した武器種（確度低）
     skill_cards: list[SkillCard] = field(default_factory=list)  # カードクロップ結果
 
 

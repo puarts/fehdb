@@ -7,7 +7,7 @@ import anthropic
 from models import ExtractedSkill, FrameGroup, SkillCard
 from ocr import (
     extract_json, print_json, parse_jp_response, parse_en_response,
-    load_images, build_match_prompt, augment_prompt_with_ocr_hint,
+    load_images, build_match_prompt, augment_prompt_with_ocr_hint, augment_prompt_with_weapon_hint,
     JP_USER_PROMPT_NEW_ONLY, EN_USER_PROMPT_NEW_ONLY,
     JP_USER_PROMPT_SINGLE_CARD, EN_USER_PROMPT_SINGLE_CARD,
     JP_LINEBREAK_RULES, JP_LINEBREAK_EXAMPLES,
@@ -98,7 +98,7 @@ class ClaudeOCRBackend:
                     print(f"    カードクロップ: {len(group.skill_cards)}枚")
                     for card in group.skill_cards:
                         card_images = load_images([card.image_path])
-                        skill_data = self._call_vision_api_jp_single_card(card_images, ocr_hint=group.ocr_hint)
+                        skill_data = self._call_vision_api_jp_single_card(card_images, ocr_hint=group.ocr_hint, weapon_hint=group.weapon_hint)
                         skill = parse_jp_response(skill_data, group.frame_index)
                         if not skill.jp_name:
                             print(f"    → カード{card.card_index}: 非スキル（スキップ）")
@@ -112,7 +112,7 @@ class ClaudeOCRBackend:
                 elif new_only:
                     # カードクロップなし（単体画面等）: 従来の全画面OCR
                     images = load_images(group.all_frames)
-                    skills_data = self._call_vision_api_jp_new_only(images, ocr_hint=group.ocr_hint)
+                    skills_data = self._call_vision_api_jp_new_only(images, ocr_hint=group.ocr_hint, weapon_hint=group.weapon_hint)
                     if not skills_data:
                         print("    → 新スキルなし（スキップ）")
                         continue
@@ -125,7 +125,7 @@ class ClaudeOCRBackend:
                         print(f"    → {skill.jp_name}")
                 else:
                     images = load_images(group.all_frames)
-                    skill_data = self._call_vision_api_jp(images, ocr_hint=group.ocr_hint)
+                    skill_data = self._call_vision_api_jp(images, ocr_hint=group.ocr_hint, weapon_hint=group.weapon_hint)
                     skill = parse_jp_response(skill_data, group.frame_index)
                     if not skill.jp_name:
                         print("    → 非スキル画面（スキップ）")
@@ -213,9 +213,10 @@ class ClaudeOCRBackend:
 
         return {}
 
-    def _call_vision_api_jp_single_card(self, images: list[dict], ocr_hint: str | None = None) -> dict:
+    def _call_vision_api_jp_single_card(self, images: list[dict], ocr_hint: str | None = None, weapon_hint: str | None = None) -> dict:
         """JPカードクロップ画像をClaude Vision APIに送信し、単一スキルJSONを返す"""
         prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT_SINGLE_CARD, ocr_hint)
+        prompt = augment_prompt_with_weapon_hint(prompt, weapon_hint)
         content = images + [{"type": "text", "text": prompt}]
 
         for attempt in range(MAX_RETRIES):
@@ -274,9 +275,10 @@ class ClaudeOCRBackend:
 
         raise RuntimeError("EN OCR (single_card): 最大リトライ回数超過")
 
-    def _call_vision_api_jp_new_only(self, images: list[dict], ocr_hint: str | None = None) -> list[dict]:
+    def _call_vision_api_jp_new_only(self, images: list[dict], ocr_hint: str | None = None, weapon_hint: str | None = None) -> list[dict]:
         """JP画像をClaude Vision APIに送信し、新スキルのみJSON配列で返す"""
         prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT_NEW_ONLY, ocr_hint)
+        prompt = augment_prompt_with_weapon_hint(prompt, weapon_hint)
         content = images + [{"type": "text", "text": prompt}]
 
         for attempt in range(MAX_RETRIES):
@@ -307,9 +309,10 @@ class ClaudeOCRBackend:
 
         raise RuntimeError("JP OCR (new_only): 最大リトライ回数超過")
 
-    def _call_vision_api_jp(self, images: list[dict], ocr_hint: str | None = None) -> dict:
+    def _call_vision_api_jp(self, images: list[dict], ocr_hint: str | None = None, weapon_hint: str | None = None) -> dict:
         """JP画像をClaude Vision APIに送信し、JSONレスポンスを返す"""
         prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT, ocr_hint)
+        prompt = augment_prompt_with_weapon_hint(prompt, weapon_hint)
         content = images + [{"type": "text", "text": prompt}]
 
         for attempt in range(MAX_RETRIES):

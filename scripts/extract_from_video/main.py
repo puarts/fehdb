@@ -76,8 +76,8 @@ def main():
     parser.add_argument("--frames-only", action="store_true",
                         help="フレーム抽出・スキル画面検出まで実行（OCRは行わない）")
     parser.add_argument("--keep-frames", action="store_true", help="デバッグ用にフレーム画像を残す")
-    parser.add_argument("--min-duration", type=float, default=1.5,
-                        help="静止区間の最低秒数（これより短い静止を無視、デフォルト: 1.5秒）")
+    parser.add_argument("--min-duration", type=float, default=1.4,
+                        help="静止区間の最低秒数（これより短い静止を無視、デフォルト: 1.4秒）")
     parser.add_argument("--local-ocr",
                         choices=["auto", "apple", "tesseract", "none"],
                         default="none",
@@ -155,20 +155,21 @@ def _run_pipeline(args, work_dir: Path):
             en_video.path, en_frames_dir, min_duration=args.min_duration,
         )
 
-    # === Step 2.5: 英雄紹介フレーム検出（武器種取得） ===
-    hero_weapon_types: dict[float, str] = {}  # timestamp → weapon_type
+    # === Step 2.5: 英雄紹介フレーム検出（武器種ヒント取得） ===
+    # timestamp → weapon_type のヒント（LLM推定、確度低）
+    hero_weapon_hints: dict[float, str] = {}
+    strict_timestamps: list[float] = []
     if args.detect_weapon:
-        from weapon_type import detect_weapon_types_batch, get_weapon_code
+        from weapon_type import (
+            detect_weapon_types_batch, get_weapon_code,
+            classify_weapon_hints_batch,
+        )
 
         print()
         print("=" * 50)
-        print("Step 2.5: 英雄紹介フレーム検出（武器種取得）")
+        print("Step 2.5: 英雄紹介フレーム検出（武器種ヒント取得）")
         print("=" * 50)
 
-        # strict検出のタイムスタンプを取得（Step 2のフレームから逆算）
-        # フレームファイル名から元のインデックスを取得し、タイムスタンプを再計算
-        # ※ extract_static_framesはタイムスタンプを返さないため、
-        #    ここでは差分法のためにloose検出を別途実行する
         strict_timestamps = _extract_timestamps(jp_video.path, min_duration=args.min_duration)
 
         hero_candidates_dir = str(work_dir / "frames" / "hero_candidates")
@@ -181,18 +182,29 @@ def _run_pipeline(args, work_dir: Path):
         )
 
         if hero_candidates:
+            # テンプレートマッチングで英雄紹介フレームを検出
             candidate_paths = [path for path, _ in hero_candidates]
-            results = detect_weapon_types_batch(candidate_paths)
+            tm_results = detect_weapon_types_batch(candidate_paths)
 
-            detected_count = 0
-            for (frame_path, weapon_type, score), (_, ts) in zip(results, hero_candidates):
-                if weapon_type:
-                    hero_weapon_types[ts] = weapon_type
-                    code = get_weapon_code(weapon_type)
-                    detected_count += 1
-                    print(f"  {Path(frame_path).name}: {weapon_type} (code={code}, score={score:.3f})")
+            # テンプレートマッチングで検出されたフレームのみLLM分類
+            hero_frames = [
+                (path, ts)
+                for (path, weapon, score), (_, ts) in zip(tm_results, hero_candidates)
+                if weapon is not None
+            ]
 
-            print(f"\n英雄紹介フレーム: {detected_count}/{len(hero_candidates)} 検出")
+            if hero_frames:
+                print(f"\n英雄紹介フレーム: {len(hero_frames)} 検出")
+                print("LLMで武器種ヒント取得中...")
+                gemini_model = getattr(args, "gemini_model", "gemini-2.5-flash")
+                llm_results = classify_weapon_hints_batch(
+                    [path for path, _ in hero_frames],
+                    model=gemini_model,
+                )
+                for (_, weapon_hint), (_, ts) in zip(llm_results, hero_frames):
+                    if weapon_hint:
+                        hero_weapon_hints[ts] = weapon_hint
+                print(f"武器種ヒント: {len(hero_weapon_hints)}/{len(hero_frames)}")
         else:
             print("  差分候補フレームなし")
 
@@ -212,6 +224,10 @@ def _run_pipeline(args, work_dir: Path):
     print(f"\nJP スキル数: {len(jp_frame_groups)}")
     if en_frame_groups:
         print(f"EN スキル数: {len(en_frame_groups)}")
+
+    # 武器種ヒントをFrameGroupに関連付け
+    if hero_weapon_hints and strict_timestamps:
+        _assign_weapon_hints(jp_frame_groups, jp_static_frames, strict_timestamps, hero_weapon_hints)
 
     # === Step 3.5: スキルカードクロップ ===
     if not args.no_card_crop:
@@ -271,18 +287,36 @@ def _run_pipeline(args, work_dir: Path):
     print("\n[日本語版]")
     jp_skills = backend.ocr_jp_skills(jp_frame_groups, new_only=new_only)
 
+    # DB照合: LLMのis_new誤判定を補正し、既存スキルを除去
+    from formatter import get_existing_skill_names
+    existing_names = get_existing_skill_names()
+    if existing_names:
+        before_count = len(jp_skills)
+        jp_skills = [s for s in jp_skills if s.jp_name.startswith("__") or s.jp_name not in existing_names]
+        removed = before_count - len(jp_skills)
+        if removed > 0:
+            print(f"  DB照合: {removed}件の既存スキルを除去（残り{len(jp_skills)}件）")
+
     en_skills = []
     if en_frame_groups:
         print("\n[英語版 OCR]")
-        en_skills = backend.ocr_en_skills(en_frame_groups, new_only=new_only)
+        en_skills = backend.ocr_en_skills(en_frame_groups, new_only=False)
         print(f"  EN スキル数: {len(en_skills)}")
 
         print("\n[JP↔ENマッチング]")
         jp_valid = [s for s in jp_skills if not s.jp_name.startswith("__")]
         en_map = backend.match_jp_en_skills(jp_valid, en_skills)
+        # LLMがキーにメタデータ（例: "スキル名 (パッシブB)"）を含める場合があるので
+        # 括弧以前のスキル名のみで照合する正規化マップを作成
+        en_map_normalized: dict[str, str | None] = {}
+        for k, v in en_map.items():
+            name = k.split(" (")[0].strip()
+            # 同名スキルの重複時は最初のマッチを優先
+            if name not in en_map_normalized:
+                en_map_normalized[name] = v
         for skill in jp_skills:
             if not skill.jp_name.startswith("__"):
-                skill.en_name = en_map.get(skill.jp_name)
+                skill.en_name = en_map_normalized.get(skill.jp_name)
         matched = sum(1 for s in jp_skills if s.en_name)
         print(f"  マッチング結果: {matched}/{len(jp_valid)} スキル")
 
@@ -314,6 +348,15 @@ def _run_pipeline(args, work_dir: Path):
         print("-" * 40)
         print(en_output_content)
         print("-" * 40)
+
+    # LLM API呼び出し回数の集計
+    llm_calls = 0
+    if hasattr(backend, "api_call_count"):
+        llm_calls += backend.api_call_count
+    if hero_weapon_hints:
+        llm_calls += len(hero_weapon_hints)  # classify_weapon_hints_batch の呼び出し数
+    if llm_calls > 0:
+        print(f"\nLLM API呼び出し回数: {llm_calls}")
 
     if args.dry_run:
         print(f"[ドライラン] JP スキル数: {len(jp_skills)}")
@@ -360,6 +403,48 @@ def _extract_timestamps(
     result = subprocess.run(cmd, capture_output=True, text=True)
     intervals = _parse_freezedetect(result.stderr)
     return [(s + e) / 2 for s, e in intervals]
+
+
+def _assign_weapon_hints(
+    frame_groups: list,
+    static_frame_paths: list[str],
+    static_timestamps: list[float],
+    hero_weapon_hints: dict[float, str],
+) -> None:
+    """英雄紹介フレームの武器種ヒントを後続のFrameGroupに関連付け
+
+    Args:
+        frame_groups: スキルFrameGroupのリスト
+        static_frame_paths: extract_static_framesの出力パスリスト
+        static_timestamps: static_frame_pathsと1:1対応するタイムスタンプ
+        hero_weapon_hints: 英雄紹介タイムスタンプ → 武器種ヒント
+    """
+    if not hero_weapon_hints:
+        return
+
+    hint_timestamps = sorted(hero_weapon_hints.keys())
+
+    # static_frame_pathsのファイル名 → タイムスタンプのマッピング
+    frame_name_to_ts: dict[str, float] = {}
+    for path, ts in zip(static_frame_paths, static_timestamps):
+        frame_name_to_ts[Path(path).name] = ts
+
+    for group in frame_groups:
+        rep_name = Path(group.representative).name
+        skill_ts = frame_name_to_ts.get(rep_name)
+        if skill_ts is None:
+            continue
+
+        # このスキルフレームより前で最も近い英雄紹介のヒントを選ぶ
+        best_hint = None
+        for ts in hint_timestamps:
+            if ts < skill_ts:
+                best_hint = hero_weapon_hints[ts]
+            else:
+                break
+
+        if best_hint:
+            group.weapon_hint = best_hint
 
 
 def _generate_output_name() -> str:
