@@ -1,0 +1,608 @@
+{
+  "task": "hero_intro_detection",
+  "source_video": ".work/09-09-16/videos/jp_video.mp4",
+  "description": "つながりアシュ＆響心リョウマ (2025-09-16)",
+  "labels": [
+    "hero_intro",
+    "skill_screen",
+    "other"
+  ],
+  "frames": {
+    "frame_00000.png": {
+      "label": "other",
+      "timestamp": 4.821
+    },
+    "frame_00001.png": {
+      "label": "other",
+      "timestamp": 6.64
+    },
+    "frame_00002.png": {
+      "label": "other",
+      "timestamp": 8.175
+    },
+    "frame_00003.png": {
+      "label": "other",
+      "timestamp": 9.543
+    },
+    "frame_00004.png": {
+      "label": "other",
+      "timestamp": 12.68
+    },
+    "frame_00005.png": {
+      "label": "other",
+      "timestamp": 14.631
+    },
+    "frame_00006.png": {
+      "label": "other",
+      "timestamp": 15.816
+    },
+    "frame_00007.png": {
+      "label": "other",
+      "timestamp": 17.1
+    },
+    "frame_00008.png": {
+      "label": "hero_intro",
+      "timestamp": 20.454,
+      "hero_name": "リョウマ"
+    },
+    "frame_00009.png": {
+      "label": "other",
+      "timestamp": 22.648
+    },
+    "frame_00010.png": {
+      "label": "other",
+      "timestamp": 24.308
+    },
+    "frame_00011.png": {
+      "label": "other",
+      "timestamp": 25.692
+    },
+    "frame_00012.png": {
+      "label": "other",
+      "timestamp": 27.127
+    },
+    "frame_00013.png": {
+      "label": "other",
+      "timestamp": 30.18
+    },
+    "frame_00014.png": {
+      "label": "other",
+      "timestamp": 36.27
+    },
+    "frame_00015.png": {
+      "label": "other",
+      "timestamp": 39.014
+    },
+    "frame_00016.png": {
+      "label": "other",
+      "timestamp": 40.207
+    },
+    "frame_00017.png": {
+      "label": "other",
+      "timestamp": 44.361
+    },
+    "frame_00018.png": {
+      "label": "other",
+      "timestamp": 45.721
+    },
+    "frame_00019.png": {
+      "label": "other",
+      "timestamp": 48.182
+    },
+    "frame_00020.png": {
+      "label": "other",
+      "timestamp": 49.783
+    },
+    "frame_00021.png": {
+      "label": "other",
+      "timestamp": 51.368
+    },
+    "frame_00022.png": {
+      "label": "other",
+      "timestamp": 52.719
+    },
+    "frame_00023.png": {
+      "label": "other",
+      "timestamp": 54.588
+    },
+    "frame_00024.png": {
+      "label": "other",
+      "timestamp": 56.081
+    },
+    "frame_00025.png": {
+      "label": "other",
+      "timestamp": 58.392
+    },
+    "frame_00026.png": {
+      "label": "other",
+      "timestamp": 59.776
+    },
+    "frame_00027.png": {
+      "label": "other",
+      "timestamp": 62.179
+    },
+    "frame_00028.png": {
+      "label": "other",
+      "timestamp": 63.772
+    },
+    "frame_00029.png": {
+      "label": "other",
+      "timestamp": 65.632
+    },
+    "frame_00030.png": {
+      "label": "other",
+      "timestamp": 67.384
+    },
+    "frame_00031.png": {
+      "label": "other",
+      "timestamp": 69.002
+    },
+    "frame_00032.png": {
+      "label": "other",
+      "timestamp": 70.704
+    },
+    "frame_00033.png": {
+      "label": "other",
+      "timestamp": 74.358
+    },
+    "frame_00034.png": {
+      "label": "other",
+      "timestamp": 78.662
+    },
+    "frame_00035.png": {
+      "label": "other",
+      "timestamp": 80.864
+    },
+    "frame_00036.png": {
+      "label": "other",
+      "timestamp": 82.165
+    },
+    "frame_00037.png": {
+      "label": "other",
+      "timestamp": 85.686
+    },
+    "frame_00038.png": {
+      "label": "other",
+      "timestamp": 89.34
+    },
+    "frame_00039.png": {
+      "label": "other",
+      "timestamp": 90.724
+    },
+    "frame_00040.png": {
+      "label": "other",
+      "timestamp": 91.725
+    },
+    "frame_00041.png": {
+      "label": "other",
+      "timestamp": 94.728
+    },
+    "frame_00042.png": {
+      "label": "other",
+      "timestamp": 96.246
+    },
+    "frame_00043.png": {
+      "label": "other",
+      "timestamp": 99.032
+    },
+    "frame_00044.png": {
+      "label": "other",
+      "timestamp": 100.767
+    },
+    "frame_00045.png": {
+      "label": "other",
+      "timestamp": 102.503
+    },
+    "frame_00046.png": {
+      "label": "other",
+      "timestamp": 104.371
+    },
+    "frame_00047.png": {
+      "label": "other",
+      "timestamp": 106.24
+    },
+    "frame_00048.png": {
+      "label": "other",
+      "timestamp": 109.226
+    },
+    "frame_00049.png": {
+      "label": "other",
+      "timestamp": 112.062
+    },
+    "frame_00050.png": {
+      "label": "other",
+      "timestamp": 114.99
+    },
+    "frame_00051.png": {
+      "label": "other",
+      "timestamp": 117.518
+    },
+    "frame_00052.png": {
+      "label": "other",
+      "timestamp": 118.552
+    },
+    "frame_00053.png": {
+      "label": "other",
+      "timestamp": 119.57
+    },
+    "frame_00054.png": {
+      "label": "hero_intro",
+      "timestamp": 122.956,
+      "hero_name": "ヒノカ"
+    },
+    "frame_00055.png": {
+      "label": "other",
+      "timestamp": 125.025
+    },
+    "frame_00056.png": {
+      "label": "other",
+      "timestamp": 126.059
+    },
+    "frame_00057.png": {
+      "label": "other",
+      "timestamp": 127.094
+    },
+    "frame_00058.png": {
+      "label": "other",
+      "timestamp": 128.695
+    },
+    "frame_00059.png": {
+      "label": "other",
+      "timestamp": 131.448
+    },
+    "frame_00060.png": {
+      "label": "other",
+      "timestamp": 137.688
+    },
+    "frame_00061.png": {
+      "label": "other",
+      "timestamp": 142.476
+    },
+    "frame_00062.png": {
+      "label": "other",
+      "timestamp": 145.679
+    },
+    "frame_00063.png": {
+      "label": "other",
+      "timestamp": 147.13
+    },
+    "frame_00064.png": {
+      "label": "other",
+      "timestamp": 149.35
+    },
+    "frame_00065.png": {
+      "label": "other",
+      "timestamp": 150.667
+    },
+    "frame_00066.png": {
+      "label": "other",
+      "timestamp": 152.169
+    },
+    "frame_00067.png": {
+      "label": "other",
+      "timestamp": 154.738
+    },
+    "frame_00068.png": {
+      "label": "other",
+      "timestamp": 157.407
+    },
+    "frame_00069.png": {
+      "label": "other",
+      "timestamp": 158.992
+    },
+    "frame_00070.png": {
+      "label": "other",
+      "timestamp": 160.31
+    },
+    "frame_00071.png": {
+      "label": "other",
+      "timestamp": 163.272
+    },
+    "frame_00072.png": {
+      "label": "other",
+      "timestamp": 165.683
+    },
+    "frame_00073.png": {
+      "label": "other",
+      "timestamp": 169.052
+    },
+    "frame_00074.png": {
+      "label": "other",
+      "timestamp": 171.004
+    },
+    "frame_00075.png": {
+      "label": "hero_intro",
+      "timestamp": 174.274,
+      "hero_name": "クリムゾン"
+    },
+    "frame_00076.png": {
+      "label": "other",
+      "timestamp": 176.276
+    },
+    "frame_00077.png": {
+      "label": "other",
+      "timestamp": 177.361
+    },
+    "frame_00078.png": {
+      "label": "other",
+      "timestamp": 178.879
+    },
+    "frame_00079.png": {
+      "label": "other",
+      "timestamp": 180.113
+    },
+    "frame_00080.png": {
+      "label": "other",
+      "timestamp": 183.634
+    },
+    "frame_00081.png": {
+      "label": "other",
+      "timestamp": 189.022
+    },
+    "frame_00082.png": {
+      "label": "other",
+      "timestamp": 192.331
+    },
+    "frame_00083.png": {
+      "label": "other",
+      "timestamp": 195.304
+    },
+    "frame_00084.png": {
+      "label": "other",
+      "timestamp": 197.414
+    },
+    "frame_00085.png": {
+      "label": "other",
+      "timestamp": 198.448
+    },
+    "frame_00086.png": {
+      "label": "other",
+      "timestamp": 201.443
+    },
+    "frame_00087.png": {
+      "label": "other",
+      "timestamp": 202.503
+    },
+    "frame_00088.png": {
+      "label": "other",
+      "timestamp": 204.371
+    },
+    "frame_00089.png": {
+      "label": "other",
+      "timestamp": 207.291
+    },
+    "frame_00090.png": {
+      "label": "other",
+      "timestamp": 209.76
+    },
+    "frame_00091.png": {
+      "label": "other",
+      "timestamp": 211.762
+    },
+    "frame_00092.png": {
+      "label": "hero_intro",
+      "timestamp": 215.065,
+      "hero_name": "アシュ"
+    },
+    "frame_00093.png": {
+      "label": "other",
+      "timestamp": 217.275
+    },
+    "frame_00094.png": {
+      "label": "other",
+      "timestamp": 219.186
+    },
+    "frame_00095.png": {
+      "label": "other",
+      "timestamp": 220.754
+    },
+    "frame_00096.png": {
+      "label": "other",
+      "timestamp": 222.539
+    },
+    "frame_00097.png": {
+      "label": "other",
+      "timestamp": 223.907
+    },
+    "frame_00098.png": {
+      "label": "other",
+      "timestamp": 226.693
+    },
+    "frame_00099.png": {
+      "label": "other",
+      "timestamp": 232.85
+    },
+    "frame_00100.png": {
+      "label": "other",
+      "timestamp": 238.906
+    },
+    "frame_00101.png": {
+      "label": "other",
+      "timestamp": 243.81
+    },
+    "frame_00102.png": {
+      "label": "other",
+      "timestamp": 248.281
+    },
+    "frame_00103.png": {
+      "label": "other",
+      "timestamp": 251.718
+    },
+    "frame_00104.png": {
+      "label": "other",
+      "timestamp": 252.786
+    },
+    "frame_00105.png": {
+      "label": "other",
+      "timestamp": 254.404
+    },
+    "frame_00106.png": {
+      "label": "other",
+      "timestamp": 255.539
+    },
+    "frame_00107.png": {
+      "label": "other",
+      "timestamp": 258.008
+    },
+    "frame_00108.png": {
+      "label": "other",
+      "timestamp": 260.427
+    },
+    "frame_00109.png": {
+      "label": "other",
+      "timestamp": 263.38
+    },
+    "frame_00110.png": {
+      "label": "other",
+      "timestamp": 267.05
+    },
+    "frame_00111.png": {
+      "label": "other",
+      "timestamp": 270.437
+    },
+    "frame_00112.png": {
+      "label": "other",
+      "timestamp": 272.94
+    },
+    "frame_00113.png": {
+      "label": "other",
+      "timestamp": 275.492
+    },
+    "frame_00114.png": {
+      "label": "other",
+      "timestamp": 277.878
+    },
+    "frame_00115.png": {
+      "label": "other",
+      "timestamp": 280.364
+    },
+    "frame_00116.png": {
+      "label": "other",
+      "timestamp": 283.6
+    },
+    "frame_00117.png": {
+      "label": "other",
+      "timestamp": 286.019
+    },
+    "frame_00118.png": {
+      "label": "other",
+      "timestamp": 289.106
+    },
+    "frame_00119.png": {
+      "label": "other",
+      "timestamp": 291.291
+    },
+    "frame_00120.png": {
+      "label": "other",
+      "timestamp": 292.893
+    },
+    "frame_00121.png": {
+      "label": "other",
+      "timestamp": 294.211
+    },
+    "frame_00122.png": {
+      "label": "other",
+      "timestamp": 296.496
+    },
+    "frame_00123.png": {
+      "label": "other",
+      "timestamp": 300.934
+    },
+    "frame_00124.png": {
+      "label": "other",
+      "timestamp": 303.003
+    },
+    "frame_00125.png": {
+      "label": "other",
+      "timestamp": 305.606
+    },
+    "frame_00126.png": {
+      "label": "other",
+      "timestamp": 308.325
+    },
+    "frame_00127.png": {
+      "label": "other",
+      "timestamp": 311.078
+    },
+    "frame_00128.png": {
+      "label": "other",
+      "timestamp": 313.197
+    },
+    "frame_00129.png": {
+      "label": "other",
+      "timestamp": 316.817
+    },
+    "frame_00130.png": {
+      "label": "other",
+      "timestamp": 321.171
+    },
+    "frame_00131.png": {
+      "label": "other",
+      "timestamp": 323.19
+    },
+    "frame_00132.png": {
+      "label": "other",
+      "timestamp": 325.692
+    },
+    "frame_00133.png": {
+      "label": "other",
+      "timestamp": 328.362
+    },
+    "frame_00134.png": {
+      "label": "other",
+      "timestamp": 329.463
+    },
+    "frame_00135.png": {
+      "label": "other",
+      "timestamp": 331.815
+    },
+    "frame_00136.png": {
+      "label": "other",
+      "timestamp": 334.368
+    },
+    "frame_00137.png": {
+      "label": "other",
+      "timestamp": 337.087
+    },
+    "frame_00138.png": {
+      "label": "other",
+      "timestamp": 341.634
+    },
+    "frame_00139.png": {
+      "label": "other",
+      "timestamp": 343.168
+    },
+    "frame_00140.png": {
+      "label": "other",
+      "timestamp": 344.77
+    },
+    "frame_00141.png": {
+      "label": "other",
+      "timestamp": 346.23
+    },
+    "frame_00142.png": {
+      "label": "other",
+      "timestamp": 347.581
+    },
+    "frame_00143.png": {
+      "label": "other",
+      "timestamp": 349.917
+    },
+    "frame_00144.png": {
+      "label": "other",
+      "timestamp": 351.185
+    },
+    "frame_00145.png": {
+      "label": "other",
+      "timestamp": 355.222
+    },
+    "frame_00146.png": {
+      "label": "other",
+      "timestamp": 364.314
+    },
+    "frame_00147.png": {
+      "label": "other",
+      "timestamp": 368.202
+    }
+  }
+}

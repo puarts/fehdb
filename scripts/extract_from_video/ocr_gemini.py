@@ -6,11 +6,12 @@ from pathlib import Path
 from google import genai
 from google.genai import types
 
-from models import ExtractedSkill, FrameGroup
+from models import ExtractedSkill, FrameGroup, SkillCard
 from ocr import (
     extract_json, print_json, parse_jp_response, parse_en_response,
-    build_match_prompt, augment_prompt_with_ocr_hint,
+    build_match_prompt, augment_prompt_with_ocr_hint, augment_prompt_with_weapon_hint,
     JP_USER_PROMPT_NEW_ONLY, EN_USER_PROMPT_NEW_ONLY,
+    JP_USER_PROMPT_SINGLE_CARD, EN_USER_PROMPT_SINGLE_CARD,
 )
 from ocr_claude import (
     JP_SYSTEM_PROMPT, JP_USER_PROMPT,
@@ -42,6 +43,7 @@ class GeminiOCRBackend:
     def __init__(self, model: str = MODEL):
         self.model = model
         self.client = genai.Client()
+        self.api_call_count = 0
 
     def ocr_jp_skills(self, frame_groups: list[FrameGroup], new_only: bool = True) -> list[ExtractedSkill]:
         """日本語版スキル画面をOCRし、ExtractedSkillリストを返す"""
@@ -50,8 +52,27 @@ class GeminiOCRBackend:
             print(f"  JP OCR [{i + 1}/{len(frame_groups)}]: {Path(group.representative).name}")
 
             try:
-                if new_only:
-                    skills_data = self._call_vision_api_jp_new_only(group.all_frames, ocr_hint=group.ocr_hint)
+                if group.skill_cards:
+                    # カードクロップあり: 個別カードをOCR
+                    print(f"    カードクロップ: {len(group.skill_cards)}枚")
+                    for card in group.skill_cards:
+                        skill_data = self._call_vision_api_jp_single_card(
+                            [card.image_path], ocr_hint=group.ocr_hint, weapon_hint=group.weapon_hint,
+                        )
+                        skill = parse_jp_response(skill_data, group.frame_index)
+                        if not skill.jp_name:
+                            print(f"    → カード{card.card_index}: 非スキル（スキップ）")
+                            continue
+                        is_new = skill_data.get("is_new", True)
+                        if new_only and not is_new:
+                            print(f"    → カード{card.card_index}: {skill.jp_name}（既存スキル、スキップ）")
+                            continue
+                        results.append(skill)
+                        print(f"    → カード{card.card_index}: {skill.jp_name}")
+                elif new_only:
+                    skills_data = self._call_vision_api_jp_new_only(
+                        group.all_frames, ocr_hint=group.ocr_hint, weapon_hint=group.weapon_hint,
+                    )
                     if not skills_data:
                         print("    → 新スキルなし（スキップ）")
                         continue
@@ -63,7 +84,9 @@ class GeminiOCRBackend:
                         results.append(skill)
                         print(f"    → {skill.jp_name}")
                 else:
-                    skill_data = self._call_vision_api_jp(group.all_frames, ocr_hint=group.ocr_hint)
+                    skill_data = self._call_vision_api_jp(
+                        group.all_frames, ocr_hint=group.ocr_hint, weapon_hint=group.weapon_hint,
+                    )
                     skill = parse_jp_response(skill_data, group.frame_index)
                     if not skill.jp_name:
                         print("    → 非スキル画面（スキップ）")
@@ -86,7 +109,22 @@ class GeminiOCRBackend:
             print(f"  EN OCR [{i + 1}/{len(frame_groups)}]: {Path(group.representative).name}")
 
             try:
-                if new_only:
+                if group.skill_cards:
+                    # カードクロップあり: 個別カードをOCR
+                    print(f"    カードクロップ: {len(group.skill_cards)}枚")
+                    for card in group.skill_cards:
+                        skill_data = self._call_vision_api_en_single_card([card.image_path])
+                        skill = parse_en_response(skill_data, group.frame_index)
+                        if not skill.en_name:
+                            print(f"    → カード{card.card_index}: 非スキル（スキップ）")
+                            continue
+                        is_new = skill_data.get("is_new", True)
+                        if new_only and not is_new:
+                            print(f"    → カード{card.card_index}: {skill.en_name}（既存スキル、スキップ）")
+                            continue
+                        results.append(skill)
+                        print(f"    → カード{card.card_index}: {skill.en_name}")
+                elif new_only:
                     skills_data = self._call_vision_api_en_new_only(group.all_frames)
                     for skill_data in skills_data:
                         skill = parse_en_response(skill_data, group.frame_index)
@@ -106,6 +144,7 @@ class GeminiOCRBackend:
 
         for attempt in range(MAX_RETRIES):
             try:
+                self.api_call_count += 1
                 response = self.client.models.generate_content(
                     model=self.model,
                     contents=[prompt],
@@ -134,14 +173,86 @@ class GeminiOCRBackend:
 
         return {}
 
-    def _call_vision_api_jp_new_only(self, frame_paths: list[str], ocr_hint: str | None = None) -> list[dict]:
-        """JP画像をGemini Vision APIに送信し、新スキルのみJSON配列で返す"""
+    def _call_vision_api_jp_single_card(self, frame_paths: list[str], ocr_hint: str | None = None, weapon_hint: str | None = None) -> dict:
+        """JPカードクロップ画像をGemini Vision APIに送信し、単一スキルJSONを返す"""
         image_parts = _load_image_parts(frame_paths)
-        prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT_NEW_ONLY, ocr_hint)
+        prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT_SINGLE_CARD, ocr_hint)
+        prompt = augment_prompt_with_weapon_hint(prompt, weapon_hint)
         contents = image_parts + [prompt]
 
         for attempt in range(MAX_RETRIES):
             try:
+                self.api_call_count += 1
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=JP_SYSTEM_PROMPT,
+                        temperature=0,
+                    ),
+                )
+                text = response.text
+                data = extract_json(text)
+                print_json(data)
+                return data
+            except _RETRYABLE_ERRORS:
+                wait = 2 ** attempt
+                print(f"    サーバーエラー/レート制限、{wait}秒待機...")
+                time.sleep(wait)
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    wait = 2 ** attempt
+                    print(f"    リトライ ({attempt + 1}/{MAX_RETRIES}): {e}")
+                    time.sleep(wait)
+                else:
+                    raise
+
+        raise RuntimeError("JP OCR (single_card): 最大リトライ回数超過")
+
+    def _call_vision_api_en_single_card(self, frame_paths: list[str]) -> dict:
+        """ENカードクロップ画像をGemini Vision APIに送信し、単一スキルJSONを返す"""
+        image_parts = _load_image_parts(frame_paths)
+        contents = image_parts + [EN_USER_PROMPT_SINGLE_CARD]
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                self.api_call_count += 1
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=EN_SYSTEM_PROMPT,
+                        temperature=0,
+                    ),
+                )
+                text = response.text
+                data = extract_json(text)
+                print_json(data)
+                return data
+            except _RETRYABLE_ERRORS:
+                wait = 2 ** attempt
+                print(f"    サーバーエラー/レート制限、{wait}秒待機...")
+                time.sleep(wait)
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    wait = 2 ** attempt
+                    print(f"    リトライ ({attempt + 1}/{MAX_RETRIES}): {e}")
+                    time.sleep(wait)
+                else:
+                    raise
+
+        raise RuntimeError("EN OCR (single_card): 最大リトライ回数超過")
+
+    def _call_vision_api_jp_new_only(self, frame_paths: list[str], ocr_hint: str | None = None, weapon_hint: str | None = None) -> list[dict]:
+        """JP画像をGemini Vision APIに送信し、新スキルのみJSON配列で返す"""
+        image_parts = _load_image_parts(frame_paths)
+        prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT_NEW_ONLY, ocr_hint)
+        prompt = augment_prompt_with_weapon_hint(prompt, weapon_hint)
+        contents = image_parts + [prompt]
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                self.api_call_count += 1
                 response = self.client.models.generate_content(
                     model=self.model,
                     contents=contents,
@@ -170,14 +281,16 @@ class GeminiOCRBackend:
 
         raise RuntimeError("JP OCR (new_only): 最大リトライ回数超過")
 
-    def _call_vision_api_jp(self, frame_paths: list[str], ocr_hint: str | None = None) -> dict:
+    def _call_vision_api_jp(self, frame_paths: list[str], ocr_hint: str | None = None, weapon_hint: str | None = None) -> dict:
         """JP画像をGemini Vision APIに送信し、JSONレスポンスを返す"""
         image_parts = _load_image_parts(frame_paths)
         prompt = augment_prompt_with_ocr_hint(JP_USER_PROMPT, ocr_hint)
+        prompt = augment_prompt_with_weapon_hint(prompt, weapon_hint)
         contents = image_parts + [prompt]
 
         for attempt in range(MAX_RETRIES):
             try:
+                self.api_call_count += 1
                 response = self.client.models.generate_content(
                     model=self.model,
                     contents=contents,
@@ -211,6 +324,7 @@ class GeminiOCRBackend:
 
         for attempt in range(MAX_RETRIES):
             try:
+                self.api_call_count += 1
                 response = self.client.models.generate_content(
                     model=self.model,
                     contents=contents,

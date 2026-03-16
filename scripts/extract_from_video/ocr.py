@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Protocol, runtime_checkable
 
 from line_merger import merge_lines
-from models import ExtractedSkill, FrameGroup
+from models import ExtractedSkill, FrameGroup, SkillCard
 
 
 # === 改行ルール（両バックエンドで共有） ===
@@ -64,14 +64,14 @@ JP_USER_PROMPT_NEW_ONLY = """\
 該当スキルがない場合は空配列 [] を返してください。
 
 抽出フィールド:
-- skill_name: スキル名（文字列）
-- skill_type: スキル種別。次のいずれか: "武器", "奥義", "サポート", "パッシブA", "パッシブB", "パッシブC", "響心"
-- weapon_type: 武器種（武器の場合のみ）
-- might: 威力（武器の場合のみ、整数）
-- range: 射程（武器の場合のみ、整数）
-- special_count: 奥義カウント（奥義の場合のみ、整数）
-- description: 説明文（行ごとの配列）
-- hero_name: この画面に表示されている英雄名
+- skill_name: string — スキル名
+- skill_type: string — スキル種別。次のいずれか: "武器", "奥義", "サポート", "パッシブA", "パッシブB", "パッシブC", "響心"
+- weapon_type: string|null — 武器種（武器の場合のみ）
+- might: integer|null — 威力（武器の場合のみ）
+- range: integer|null — 射程（武器の場合のみ）
+- special_count: integer|null — 奥義カウント（奥義の場合のみ）
+- description: string[] — 説明文（行ごとの配列）
+- hero_name: string|null — この画面に表示されている英雄名
 
 descriptionの改行ルール:
 """ + JP_LINEBREAK_RULES + """
@@ -105,6 +105,87 @@ Keep on the SAME line when:
 - Parenthetical qualifiers like "(excluding area-of-effect Specials)"
 - Clauses joined by "and" or "also\""""
 
+JP_USER_PROMPT_SINGLE_CARD = """\
+このFEHのスキルカード画像から以下の情報を正確にJSON形式で抽出してください。
+
+この画像は1つのスキルカードのクロップです。
+
+抽出フィールド:
+- skill_name: string — スキル名
+- skill_type: string — スキル種別。スキル名の左にあるアイコンで判別:
+  - 「威力」「射程」の表示がある → "武器"
+  - 渦巻きアイコン + カウント数字 → "奥義"
+  - 水色/緑色の盾アイコン → "サポート"
+  - 「A」のアイコン → "パッシブA"
+  - 「B」のアイコン → "パッシブB"
+  - 「C」のアイコン → "パッシブC"
+  - 「X」のアイコン → "響心"
+  ※新スキルの場合「！」マークがアイコンに重なりますが、アイコン内の文字は判別可能です
+- weapon_type: string|null — 武器種（武器の場合のみ。例: "剣", "槍", "斧", "弓", "暗器", "杖", "竜石", "獣", "赤魔法", "青魔法", "緑魔法", "無魔法"）
+- might: integer|null — 威力（武器の場合のみ）
+- range: integer|null — 射程（武器の場合のみ）
+- special_count: integer|null — 奥義カウント（奥義の場合のみ）
+- description: string[] — 説明文（行ごとの配列）
+- hero_name: string|null — 英雄名（表示されていればnull以外）
+- is_new: boolean — このスキルが新スキルかどうか（スキルアイコン左上に黄色い「！」マークがある場合true）
+
+descriptionの改行ルール:
+""" + JP_LINEBREAK_RULES + """
+
+""" + JP_LINEBREAK_EXAMPLES + """
+
+注意事項:
+- テキストは一字一句正確に写してください。意味の推測による修正はしないでください
+- 数値は半角で記述してください
+
+入出力の例:
+（パッシブBスキルカードの画像に対する出力例）
+```json
+{"skill_name": "奥義隊形・竜眼", "skill_type": "パッシブB", "weapon_type": null, "might": null, "range": null, "special_count": null, "description": ["敵から攻撃された時、または、戦闘開始時、自身のHPが25%以上の時、戦闘中、敵の攻撃、魔防-4、自分は、与えるダメージ+魔防の20%(範囲奥義を除く)、受けるダメージ-魔防の20%(範囲奥義を除く)、自分の奥義発動カウント変動量+1(同系統効果複数時、最大値適用)、かつ敵が攻撃時発動型奥義装備時、かつ戦闘中、魔防が敵より5以上高い時、敵の最初の攻撃前に敵の奥義発動カウント+1(奥義発動カウントの最大値は超えない)"], "hero_name": null, "is_new": true}
+```
+
+出力形式（JSONのみ、他のテキストは不要）:
+```json
+{"skill_name": "スキル名", "skill_type": "武器", "is_new": true, ...}
+```"""
+
+EN_USER_PROMPT_SINGLE_CARD = """\
+Extract skill information from this FEH skill card image.
+
+This image is a crop of a single skill card.
+
+Extract the following fields:
+- skill_name: string — Skill name
+- skill_type: string — Determine from the icon to the left of the skill name:
+  - Has "Mt" and "Rng" display → "Weapon"
+  - Swirl icon + cooldown number → "Special"
+  - Cyan/green shield icon → "Assist"
+  - Letter "A" icon → "Passive A"
+  - Letter "B" icon → "Passive B"
+  - Letter "C" icon → "Passive C"
+  - Letter "X" icon → "Harmonized"
+  Note: New skills have a "!" mark overlapping the icon, but the letter is still identifiable
+- weapon_type: string|null — Weapon type (for weapons only)
+- might: integer|null — Might (for weapons only)
+- range: integer|null — Range (for weapons only)
+- special_count: integer|null — Special cooldown (for specials only)
+- description: string[] — Skill effect text (array of lines)
+- hero_name: string|null — Hero name (if shown, otherwise null)
+- is_new: boolean — Whether this is a new skill (true if yellow "!" mark is at the top-left of the skill icon)
+
+Description line-break rules:
+""" + EN_LINEBREAK_RULES + """
+
+Important:
+- Transcribe text exactly as shown. Do not correct or paraphrase.
+- Use half-width numbers.
+
+Output as JSON only (no other text):
+```json
+{"skill_name": "Heroic Maltet", "skill_type": "Weapon", "is_new": true, ...}
+```"""
+
+
 EN_USER_PROMPT_NEW_ONLY = """\
 Extract skills from this FEH skill screen.
 
@@ -131,14 +212,14 @@ This screen shows a single skill in a large card format, without a "Skills learn
 If the screen does not match either type, return an empty array [].
 
 For each extracted skill, provide:
-- skill_name: Skill name (string)
-- skill_type: One of "Weapon", "Special", "Assist", "Passive A", "Passive B", "Passive C", "Harmonized"
-- weapon_type: Weapon type (for weapons only)
-- might: Might (for weapons only, integer)
-- range: Range (for weapons only, integer)
-- special_count: Special cooldown (for specials only, integer)
-- description: Skill effect text (array of lines)
-- hero_name: Hero name shown on this screen
+- skill_name: string — Skill name
+- skill_type: string — One of "Weapon", "Special", "Assist", "Passive A", "Passive B", "Passive C", "Harmonized"
+- weapon_type: string|null — Weapon type (for weapons only)
+- might: integer|null — Might (for weapons only)
+- range: integer|null — Range (for weapons only)
+- special_count: integer|null — Special cooldown (for specials only)
+- description: string[] — Skill effect text (array of lines)
+- hero_name: string|null — Hero name shown on this screen
 
 Description line-break rules:
 """ + EN_LINEBREAK_RULES + """
@@ -166,6 +247,17 @@ def augment_prompt_with_ocr_hint(prompt: str, ocr_hint: str | None) -> str:
 ```
 {ocr_hint}
 ```"""
+
+
+def augment_prompt_with_weapon_hint(prompt: str, weapon_hint: str | None) -> str:
+    """武器種ヒントをプロンプトに追加"""
+    if not weapon_hint:
+        return prompt
+    return prompt + f"""
+
+参考情報（英雄紹介フレームからの推定、確度低）:
+この英雄の武器種は「{weapon_hint}」の可能性があります。
+ただしこの情報は不正確な場合があります。画像から読み取れる情報を優先してください。"""
 
 
 @runtime_checkable

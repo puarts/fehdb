@@ -11,6 +11,9 @@ TEXT_REPLACEMENTS = [
     ('（', '('),
     ('）', ')'),
     ('：', ':'),
+    ('％', '%'),
+    ('－', '-'),
+    ('ＨＰ', 'HP'),
     ('！', '!'),
     ('『', '「'),
     ('〇', '○'),
@@ -45,6 +48,20 @@ def get_max_skill_id() -> int:
         cursor.execute("SELECT MAX(id) FROM skills")
         row = cursor.fetchone()
         return row[0] if row and row[0] is not None else 0
+    finally:
+        conn.close()
+
+
+def get_existing_skill_names() -> set[str]:
+    """feh-skills.sqlite3から全スキル名のセットを取得"""
+    if not DB_PATH.exists():
+        return set()
+
+    conn = sqlite3.connect(str(DB_PATH))
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM skills")
+        return {row[0] for row in cursor.fetchall()}
     finally:
         conn.close()
 
